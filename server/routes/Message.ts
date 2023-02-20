@@ -1,16 +1,19 @@
 import { Request, Response } from "express"
 import Server from "server/Server"
-import Message from "../../types/message"
+import Message from "../types/message"
 
 export function addMessageRoute(server: Server) {
     server.app.post("/api/newMessage", (req: Request, res: Response<void>): void => {
         const {
-            from_user, 
-            to_user,
-            content
+            id,
+            chatId,
+            content,
+            date,
+            fromUserId,
+            tempId,
         }: Message = req.body
 
-        server.db.createMessage({from_user, to_user, content})
+        server.db.updateMessage({chatId, id, content, date, fromUserId, tempId})
         res.sendStatus(200)
     })
 

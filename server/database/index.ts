@@ -1,25 +1,35 @@
 import * as sqlite from "sqlite3"
 import * as sqlite3 from "sqlite3";
-import Message from "types/message";
-import User from "types/user";
+import Message from "../types/message";
+import User from "../types/user";
+import Chat from "../types/chat";
 import attachMessageHandlers from "./message"
 import attachUserHandlers from "./user"
+import attachChatHandlers from "./chat"
 import { open, Database } from "sqlite";
 
 export const DBSOURCE = "db.sqlite"
 
 export class DBContext {
     db: Database
-    createMessage: (message: Omit<Message, "id">) => void;
+    fakeDB = {
+        messages: {} as Record<string, Message>,
+        users:    {} as Record<string, User>,
+        chats:    {} as Record<string, Chat>,
+    }
+    updateMessage: (message: Message) => string | undefined;
     getMessages: () => Promise<Message[]>;
-    createUser: (user: Omit<User, "id">) => void;
+    updateUser: (user: User) => void;
     getUsers: () => Promise<User[]>;
+    updateChat: (chat: Chat) => void;
+    getChats: () => Promise<Chat[]>;
     
     constructor() {
         this.initializeDatabase();
 
         attachMessageHandlers.bind(this)();        
         attachUserHandlers.bind(this)();        
+        attachChatHandlers.bind(this)();        
     }
 
     async initializeDatabase() {

@@ -4,16 +4,25 @@ import path from "path"
 import { DBContext } from "./database"
 import { addMessageRoute } from "./routes/Message"
 import { addUserRoute } from "./routes/User"
+import { addChatRoute } from "./routes/Chat"
 import bodyParser from "body-parser"
+import Connection from "./types/connection"
+import WebSocketServer from "./WebSocketServer"
+import * as Models from "./types/index"
 
 export default class Server {
+    ws: WebSocketServer
     app: Express
     db: DBContext
+    connections: Record<string, Connection>
+    chats: Record<string, Models.Chat>
 
     constructor(app: Express) {
         this.app = app
 
         this.db = new DBContext()
+
+        this.ws = new WebSocketServer(this)
 
         this.app.use(cors())
         this.app.use(bodyParser.urlencoded({ extended: false }))
@@ -27,6 +36,7 @@ export default class Server {
 
         addMessageRoute(this)
         addUserRoute(this)
+        addChatRoute(this)
 
         this.app.get("*", (req: Request, res: Response): void => {
             res.sendFile(path.resolve("./") + "/client/build/index.html");

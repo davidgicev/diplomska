@@ -1,23 +1,20 @@
 import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthStoreProvider } from './authStore/provider';
+import Main from './pages/Main';
+import LoadingScreen from './pages/loading';
+import LoginScreen from './pages/login/LoginScreen';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header text-lg text-red-600">
-        <p>
-          mo4karnica
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default function App(): JSX.Element {
+	return (
+		<AuthStoreProvider>
+			<BrowserRouter>
+				<Routes>
+					<Route path='/' element={<LoadingScreen />} />
+					<Route path='/login' element={<LoginScreen />} />
+					<Route path='/home' element={ <Main /> } />
+				</Routes>
+			</BrowserRouter>
+		</AuthStoreProvider>
+	)
 }
-
-export default App;

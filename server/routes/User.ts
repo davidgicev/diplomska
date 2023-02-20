@@ -1,14 +1,14 @@
 import { Request, Response } from "express"
-import User from "../../types/user"
+import User from "../types/user"
 import Server from "server/Server"
 
 export function addUserRoute(server: Server) {
     server.app.post("/api/newUser", (req: Request, res: Response<void>): void => {
         const {
-            name
+            name, id
         }: User = req.body
 
-        server.db.createUser({name})
+        server.db.updateUser({name, id})
         res.sendStatus(200)
         // res.send(req)
     })
