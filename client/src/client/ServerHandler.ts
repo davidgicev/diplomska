@@ -101,10 +101,10 @@ export default class ServerHandler {
         const data = message.data
         this.context.context.state.actions.addNewChat({
             id: data.id,
-            messages: {},
             type: "private",
             userIds: data.userIds,
             title: data.title || data.userIds.find(id => id !== this.context.userId) || this.context.userId,
+            tempId: ""
         })
     }
 

@@ -18,11 +18,11 @@ declare namespace Store {
 
     type Chat = {
         id: string
+        tempId: string
         type: "private" | "group"
         userIds: string[]
         title?: string
         photo?: string
-        messages: Record<string, Message>
     }
 
     type Actions = import("./actions").Actions
@@ -34,6 +34,7 @@ declare namespace Store {
         activeChatId?: string
         users: Record<string, User>
         chats: Record<string, Chat>
+        messages: Record<string, Message>
         actions: { [K in keyof Actions]: OmitThisParameter<Actions[K]> }
     }
 }

@@ -16,35 +16,18 @@ export const actions = {
         console.log("Store: adding new chat", chat)
 
         this.setState((state) => {
-            if (chat.id in state.chats) {
-                return {
-                    chats: {
-                        ...state.chats,
-                        [chat.id]: {
-                            ...state.chats[chat.id],
-                            ...chat,
-                            messages: {
-                                ...state.chats[chat.id].messages,
-                                ...chat.messages,
-                            }
-                        },
-                    }
-                }
-            }
-
             return {
                 chats: {
                     ...state.chats,
                     [chat.id]: chat
                 }
             }
-    
         })
 
-        const messages = await getChatMessages(chat.id)
-        for (const messageId in messages) {
-            this.state.actions.addNewMessage(messages[messageId])
-        }
+        // const messages = await getChatMessages(chat.id)
+        // for (const messageId in messages) {
+        //     this.state.actions.addNewMessage(messages[messageId])
+        // }
     },
 
     setActiveChatId(this: StoreProvider, activeChatId: string) {
@@ -53,40 +36,18 @@ export const actions = {
 
     addNewMessage(this: StoreProvider, message: Store.Message) {
         this.setState((state) => {
-            const targetChat = state.chats[message.chatId]
-    
-            if (!targetChat) {
-                throw new Error("bitch chatov ne postoi")
+            const newMessages = { ...state.messages }
+
+            if (message.id !== message.tempId) {
+                delete newMessages[message.tempId]
             }
-    
-            const chatCopy = { ...targetChat, messages: { ...targetChat.messages } }
-            if (message.id.startsWith("temp")) {
-                const target = Object.values(chatCopy.messages).find((m) => m.tempId === message.tempId)
-                if (target) {
-                    chatCopy.messages[target.id] = {
-                        ...target,
-                        ...message,
-                        id: target.id,
-                    }
-                    return {}
-                }
-            }
-            else {
-                delete chatCopy.messages[message.tempId]
-            }
-            if (chatCopy.messages[message.id]) {
-                chatCopy.messages[message.id] = {...chatCopy.messages[message.id], ...message}
-            }
-            else {
-                chatCopy.messages[message.id] = message
-            }
+            newMessages[message.id] = message
+
             return {
                 ...state,
-                chats: {
-                    ...state.chats,
-                    [targetChat.id]: chatCopy
-                }
+                messages: newMessages,
             }
+
         })
     },
 
