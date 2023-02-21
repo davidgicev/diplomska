@@ -21,4 +21,12 @@ export function addMessageRoute(server: Server) {
         const data = await server.db.getMessages()
         res.send(data)
     })
+
+    server.app.get("/api/getChatMessages", async (req: Request, res: Response): Promise<void> => {
+        const data = await server.db.getMessages()
+        const { chatId } = req.query
+        res.send(
+            Object.fromEntries((await server.db.getMessages()).filter((m) => m.chatId === chatId).map((m) => [m.id, m]))
+        )
+    })
 }

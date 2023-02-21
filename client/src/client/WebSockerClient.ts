@@ -22,6 +22,10 @@ export default class WebSocketClient {
             return
         }
         console.log("probuvam da pratam poraka do", targetUserId, "porakata e", message)
+        console.log(this.dataChannels[targetUserId])
+        if (!this.dataChannels[targetUserId]) {
+            return
+        }
         const channel = this.dataChannels[targetUserId]
         const data: RTCMessage = {
             type: "newMessage",

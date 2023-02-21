@@ -14,6 +14,9 @@ export function updateMessage(server: Server, message: Message) {
 
     const connections = server.ws.users
     for (const userId of userIds) {
+        if (!(userId in connections)) {
+            return
+        }
         const connection = connections[userId]
         server.ws.sendTo(connection, {
             type: "newMessage",

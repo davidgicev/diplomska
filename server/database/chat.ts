@@ -8,7 +8,7 @@ export default function attachChatHandlers(this: DBContext) {
                 ...this.fakeDB.chats,
                 [chat.id]: {
                     ...this.fakeDB.chats[chat.id],
-                    ...chat
+                    ...chat,
                 }
             }
         }

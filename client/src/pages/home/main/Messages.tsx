@@ -16,8 +16,6 @@ export default function Messages(props: Props): JSX.Element {
         return <></>
     }
 
-    console.log(users)
-
     const chat = props.chat
     const messages = getOrderedMessages(chat).map((message) => ({
         message,

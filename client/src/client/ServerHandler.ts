@@ -104,7 +104,7 @@ export default class ServerHandler {
             messages: {},
             type: "private",
             userIds: data.userIds,
-            title: data.userIds.find(id => id !== this.context.userId) || this.context.userId,
+            title: data.title || data.userIds.find(id => id !== this.context.userId) || this.context.userId,
         })
     }
 

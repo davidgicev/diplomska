@@ -8,7 +8,7 @@ interface Props {
 
 export default function MessageBubble(props: Props): JSX.Element {
     const { message, user } = props
-    console.log(user)
+
     let common = "flex p-2 px-4 my-2 rounded-3xl shadow-md max-w-[60%] whitespace-normal items-end flex-col "
 
     if(props.fromSelf) {
