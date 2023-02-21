@@ -9,7 +9,7 @@ export function updateMessage(server: Server, message: Message) {
 
     const tempId = id.startsWith("temp") ? id : undefined
     const newId = server.db.updateMessage(message)
-
+    console.log(server.db.fakeDB.chats)
     const { userIds } = server.db.fakeDB.chats[chatId]
 
     const connections = server.ws.users

@@ -3,15 +3,21 @@ import { StoreContext } from "../../../store/store";
 import Header from "./Header";
 import Messages from "./Messages";
 import Input from "./Input";
+import { db } from "../../../database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function Layout(): JSX.Element {
 
-    const { chats, activeChatId } = React.useContext(StoreContext)
+    const { activeChatId } = React.useContext(StoreContext)
+    const chat = useLiveQuery(async () => {
+        if (!activeChatId) {
+            return
+        }
+        return db.chats.get(activeChatId)
+    }, [activeChatId])
 
-    if(!activeChatId)
+    if (!chat)
         return <UnselectedChatPanel />;
-
-    const chat = chats[activeChatId]
 
     return (
         <div className="flex flex-col w-[70vw] bg-mint-cream flex-2 justify-between relative shadow-xl">

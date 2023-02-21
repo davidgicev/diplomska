@@ -2,11 +2,15 @@ import React from "react";
 import { StoreContext } from "../../../store/store";
 import Chat from "./Chat";
 import StatusCard from "./StatusCard";
+import { db } from "../../../database";
+import { useLiveQuery } from "dexie-react-hooks";
 
 
 export default function Panel() {
 
-    const { chats } = React.useContext(StoreContext)
+    const chats = useLiveQuery(async () => {
+        return await db.chats.toArray()
+    }) || []
 
     // chats.sort((a:Chat, b:Chat) => {
     //     if(a.messages.length == 0 && b.messages.length == 0)
@@ -29,7 +33,7 @@ export default function Panel() {
             </div>
             <div className="flex flex-col flex-1">
             {
-                Object.values(chats).map((chat) => (
+                chats.map((chat) => (
                     <Chat
                         data={chat} key={chat.id} 
                     />

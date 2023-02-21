@@ -43,9 +43,9 @@ export default function Input(props: Props): JSX.Element {
             content: value,
             date: Date.now(),
             fromUserId: data?.id || "",
-        })
+        }, props.chat.userIds)
 
-    }, [sendMessage, setContent, content, props.chat.id, data])
+    }, [sendMessage, setContent, content, props.chat, data])
     
     const onChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         // onTyping(inputRef.current?.value);

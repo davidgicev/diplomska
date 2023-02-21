@@ -2,7 +2,7 @@ import React from "react";
 
 interface Props {
     message: Store.Message
-    user: Store.User
+    user?: Store.User
     fromSelf: boolean
 }
 
@@ -26,7 +26,7 @@ export default function MessageBubble(props: Props): JSX.Element {
 
     return (
         <div className="flex flex-row self-start items-end ml-3 m-1 max-w-[60%] whitespace-normal">
-            {user.photo &&
+            {user?.photo &&
                 <div className={`w-8 h-8 bg-center bg-cover mr-1 rounded-full`} style={{ backgroundImage: `url('${user.photo}')` }} />
             }
             <div className={"flex flex-1 p-2 px-4 my-2 rounded-3xl shadow-md whitespace-normal flex-col mb-0 bg-opal self-start rounded-bl-md items-start ml-1"} style={{ wordBreak: 'break-word' }}>

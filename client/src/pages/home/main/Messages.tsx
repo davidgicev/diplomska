@@ -1,7 +1,8 @@
 import React from "react";
-import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
 import MessageBubble from "./MessageBubble";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "../../../database";
 
 interface Props {
     chat: Store.Chat
@@ -9,20 +10,20 @@ interface Props {
 
 export default function Messages(props: Props): JSX.Element {
     const { data } = React.useContext(AuthContext)
-    const { users, messages } = React.useContext(StoreContext)
+
+    const messages = useLiveQuery(async () => {
+        return await db.messages.where("chatId").equals(props.chat.id).toArray()
+    }, [props.chat.id]) || []
+
+    const fromUsers = useLiveQuery(async () => {
+        return await Promise.all(messages.map(m => db.users.get(m.fromUserId)))
+    }, [messages]) || []
 
     if (!data) {
         return <></>
     }
 
-    const chat = props.chat
-    const targetMessages = Object.values(messages)
-                                .filter(m => m.chatId === chat.id)
-                                .map((message) => ({
-                                    message,
-                                    user: users[message.fromUserId],
-                                    fromSelf: message.fromUserId === data.id
-                                }))
+    console.log(messages)
 
     return (
         <div className="overflow-y-auto flex-1">
@@ -30,7 +31,14 @@ export default function Messages(props: Props): JSX.Element {
                 <div className="flex-1" />
                 <div className="flex flex-col items-center justify-end">
                     {
-                        targetMessages.map((data) => <MessageBubble {...data} key={data.message.id} />)
+                        messages.map((message, index) => (
+                            <MessageBubble 
+                                message={message}
+                                user={fromUsers[index]}
+                                fromSelf={fromUsers[index]?.id === data.id}
+                                key={message.id}
+                            />
+                        ))
                     }
                 </div>
             </div>

@@ -1,28 +1,34 @@
 import { getChatMessages } from "../api/messages"
+import { updateChat } from "../handler/chat"
+import { updateMessage } from "../handler/message"
+import { updateUser } from "../handler/user"
 import { StoreProvider } from "./StoreProvider"
 
 export const actions = {
     addNewUser(this: StoreProvider, user: Store.User) {
         console.log("Store: adding new user", user)
-        this.setState((state) => ({
-            users: {
-                ...state.users,
-                [user.id]: user,
-            },
-        }))
+        // this.setState((state) => ({
+        //     users: {
+        //         ...state.users,
+        //         [user.id]: user,
+        //     },
+        // }))
+        updateUser(user)
     },
 
     async addNewChat(this: StoreProvider, chat: Store.Chat) {
         console.log("Store: adding new chat", chat)
 
-        this.setState((state) => {
-            return {
-                chats: {
-                    ...state.chats,
-                    [chat.id]: chat
-                }
-            }
-        })
+        // this.setState((state) => {
+        //     return {
+        //         chats: {
+        //             ...state.chats,
+        //             [chat.id]: chat
+        //         }
+        //     }
+        // })
+
+        updateChat(chat)
 
         // const messages = await getChatMessages(chat.id)
         // for (const messageId in messages) {
@@ -43,24 +49,22 @@ export const actions = {
             }
             newMessages[message.id] = message
 
-            return {
-                ...state,
-                messages: newMessages,
-            }
-
+            // return {
+            //     ...state,
+            //     messages: newMessages,
+            // }
+            updateMessage(message)
         })
     },
 
-    sendMessage(this: StoreProvider, message: Store.Message) {
+    sendMessage(this: StoreProvider, message: Store.Message, chatUserIds: string[]) {
         console.log("Store: Sending new message", message)
         this.state.actions.addNewMessage(message)
-        const chat = this.state.chats[message.chatId]
         this.client?.serverHandler.send({
             type: "newMessage",
             data: message
         })
-        const users = chat.userIds
-        for (const id of users) {
+        for (const id of chatUserIds) {
             this.client?.sendMessage(id, message)
         }
     }
