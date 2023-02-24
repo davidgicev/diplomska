@@ -1,4 +1,4 @@
 export default class User {
-    id: string
-    name: string
+    id: number
+    username: string
 }

@@ -11,9 +11,10 @@ export function addMessageRoute(server: Server) {
             date,
             fromUserId,
             tempId,
+            tempChatId
         }: Message = req.body
 
-        server.db.updateMessage({chatId, id, content, date, fromUserId, tempId})
+        server.db.updateMessage({chatId, id, content, date, fromUserId, tempId, tempChatId})
         res.sendStatus(200)
     })
 

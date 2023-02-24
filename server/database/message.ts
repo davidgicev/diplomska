@@ -1,36 +1,24 @@
 import Message from "../types/message";
 import { DBContext } from "./"
 
-export default function attachMessageHandlers(this: DBContext) {
-    this.updateMessage = (message: Message): string | undefined => {
-        // this.db.run(`
-        //     INSERT INTO message (content, from_user, to_user)
-        //     VALUES (?, ?, ?)
-        // `, message.content, message.from_user, message.to_user)
-        if (message.id in this.fakeDB.messages) {
-            this.fakeDB.messages = {
-                ...this.fakeDB.messages,
-                [message.id]: {
-                    ...this.fakeDB.messages[message.id],
-                    ...message,
-                }
-            }
-            return
+export async function updateMessage (this: DBContext, message: Message): Promise<string | undefined> {
+    return await this.db.transaction(async (t) => {
+        let newId: number | undefined;
+        if (message.id.startsWith("temp")) {
+            const messageWithoutId = {...message}
+            delete messageWithoutId.id;
+            [newId] = await t("messages").insert(messageWithoutId)
         }
         else {
-            const id = Date.now().toString()
-            this.fakeDB.messages = {
-                ...this.fakeDB.messages,
-                [id]: message,
-            }   
-            return id
+            await t("messages").update({
+                ...message
+            })
         }
-    }
 
-    this.getMessages = async () => {
-        // const result = await this.db.all<Message[]>(`
-        //     SELECT * FROM message
-        // `)
-        return Object.values(this.fakeDB.messages)
-    }
+        return newId?.toString()
+    })
+}
+
+export async function getMessages(this: DBContext) {
+    return [] as Message[]
 }

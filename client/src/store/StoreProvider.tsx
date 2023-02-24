@@ -3,7 +3,7 @@ import { StoreContext, getBindedActions } from "./store";
 import WebSocketClient from "../client/WebSockerClient";
 
 interface Props {
-    userId: string
+    userId: number
     children: React.ReactNode
 }
 

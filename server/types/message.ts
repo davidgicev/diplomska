@@ -1,8 +1,9 @@
 export default class Message {
     id: string
-    chatId: string
-    content: string
-    fromUserId: string
-    date: number
     tempId: string
+    chatId: string
+    tempChatId: string
+    content: string
+    fromUserId: number
+    date: number
 }

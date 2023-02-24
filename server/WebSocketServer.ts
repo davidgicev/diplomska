@@ -8,7 +8,7 @@ import Server from "./Server";
 export default class WebSocketServer {
    context: Server
    server: WSServer;
-   users: Record<string, WebSocket.WebSocket>
+   users: Record<number, WebSocket.WebSocket>
    connections: Record<string, WebSocket.WebSocket>
 
    constructor(context: Server) {
@@ -20,7 +20,7 @@ export default class WebSocketServer {
          
          console.log("User connected", request.url);
          
-         const userId = request.url.substring(1)
+         const userId = Number(request.url.substring(1))
 
          connection.on("close", () => {
             delete this.users[userId]
@@ -50,7 +50,7 @@ export default class WebSocketServer {
                   console.log("User logged", body.data.id); 
    
                   const userId = body.data.id
-   
+
                   if(this.users[userId]) { 
                      this.sendTo(connection, { 
                         type: "loginResponse", 
@@ -63,16 +63,17 @@ export default class WebSocketServer {
                         type: "loginResponse", 
                         data: {
                            success: true,
-                           userIds: Object.keys(this.users)
+                           userIds: Object.keys(this.users).map(k => Number(k)),
                         }
                      }); 
                      
                      this.users[userId] = connection;
 
+                     console.log(body.data)
+
                      updateUser(this.context, {
                         id: userId,
-                        name: userId,
-                     })               
+                     })
                   }
                   
                   break;
@@ -131,7 +132,7 @@ export default class WebSocketServer {
                   break;
                }       
                
-               case "newMessage": {
+               case "upsertMessage": {
                   const message = body.data
                   updateMessage(this.context, message)
 

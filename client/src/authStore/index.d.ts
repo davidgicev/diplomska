@@ -1,6 +1,8 @@
 declare namespace AuthStore {
     interface User {
-        id: string
+        id: number
+        username: string
+        token: string
     }
 
     interface Context {

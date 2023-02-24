@@ -4,20 +4,20 @@ import ServerHandler from "./ServerHandler"
 
 export default class WebSocketClient {
     context: StoreProvider
-    userId: string
+    userId: number
     
     serverHandler: ServerHandler
 
     peerConnections: Record<string, RTCPeerConnection> = {}
     dataChannels: Record<string, RTCDataChannel> = {}
 
-    constructor(context: StoreProvider, userId: string) {
+    constructor(context: StoreProvider, userId: number) {
         this.context = context
         this.userId = userId
         this.serverHandler = new ServerHandler(this)
     }
 
-    sendMessage(targetUserId: string, message: Store.Message) {
+    sendMessage(targetUserId: number, message: Store.Message) {
         if (targetUserId === this.userId) {
             return
         }

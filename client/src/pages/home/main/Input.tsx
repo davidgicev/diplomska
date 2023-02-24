@@ -24,6 +24,9 @@ export default function Input(props: Props): JSX.Element {
     // , [props.chat.id, userContext.channel])
 
     const onPress = React.useCallback((event: React.KeyboardEvent | React.MouseEvent) => {
+        if (!data?.id) {
+            return
+        }
         if(("key" in event) && event.key !== 'Enter') {
             return;
         }
@@ -42,7 +45,8 @@ export default function Input(props: Props): JSX.Element {
             chatId: props.chat.id,
             content: value,
             date: Date.now(),
-            fromUserId: data?.id || "",
+            fromUserId: data.id,
+            tempChatId: props.chat.tempId
         }, props.chat.userIds)
 
     }, [sendMessage, setContent, content, props.chat, data])

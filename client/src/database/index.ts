@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 
 class Database extends Dexie {
-    users!:    Dexie.Table<Store.User, string>
+    users!:    Dexie.Table<Store.User, number>
     chats!:    Dexie.Table<Store.Chat, string>
     messages!: Dexie.Table<Store.Message, string>
 

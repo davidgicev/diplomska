@@ -1,7 +1,8 @@
 export type WSMessage = {
     type: "loginRequest",
     data: {
-        id: string
+        id: number
+        token: string
     }
 } | {
     type: "loginResponse",
@@ -9,53 +10,55 @@ export type WSMessage = {
         success: false
     } | {
         success: true
-        userIds: string[]
+        userIds: number[]
     }
 } | {
     type: "candidate",
     data: {
-        targetUserId: string
+        targetUserId: number
         candidate: string
     }
 } | {
     type: "offer",
     data: {
-        targetUserId: string
+        targetUserId: number
         SDU: string
     }
 } | {
     type: "answer",
     data: {
-        targetUserId: string
+        targetUserId: number
         SDU: string
     }
 } | {
-    type: "newUser",
+    type: "upsertUser",
     data: {
-        id: string
+        id: number,
     }
 } | {
-    type: "newChat",
-    data: {
-        id: string
-        title: string
-        photo: string
-        userIds: string[]
-    }
-} | {
-    type: "newMessage",
+    type: "upsertChat",
     data: {
         id: string
         tempId: string
-        fromUserId: string
+        title: string
+        photo: string
+        userIds: number[]
+    }
+} | {
+    type: "upsertMessage",
+    data: {
+        id: string
+        tempId: string
         chatId: string
+        tempChatId: string
+        fromUserId: number
         content: string
         date: number
     }
 } | {
     type: "userLeft",
     data: {
-        id: string
+        id: number
     }
 } | {
     type: "error",

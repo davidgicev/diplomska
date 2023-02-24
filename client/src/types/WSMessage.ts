@@ -1,7 +1,8 @@
 export type WSMessage = {
     type: "loginRequest",
     data: {
-        id: string
+        id: number,
+        token: string
     }
 } | {
     type: "loginResponse",
@@ -9,53 +10,56 @@ export type WSMessage = {
         success: false
     } | {
         success: true
-        userIds: string[]
+        userIds: number[]
     }
 } | {
     type: "candidate",
     data: {
-        targetUserId: string
+        targetUserId: number
         candidate: RTCIceCandidate
     }
 } | {
     type: "offer",
     data: {
-        targetUserId: string
+        targetUserId: number
         SDU: RTCSessionDescriptionInit
     }
 } | {
     type: "answer",
     data: {
-        targetUserId: string
+        targetUserId: number
         SDU: RTCSessionDescriptionInit
     }
 } | {
-    type: "newUser",
+    type: "upsertUser",
     data: {
-        id: string
+        id: number
+        username: string
     }
 } | {
-    type: "newChat",
+    type: "upsertChat",
     data: {
         id: string
+        tempId: string
         title: string
         photo: string
-        userIds: string[]
+        userIds: number[]
     }
 } | {
-    type: "newMessage",
+    type: "upsertMessage",
     data: {
         id: string
+        tempId: string
         chatId: string
+        tempChatId: string
+        fromUserId: number
         content: string
         date: number
-        fromUserId: string
-        tempId: string
     }
 } | {
     type: "userLeft",
     data: {
-        id: string
+        id: number
     }
 } | {
     type: "error",

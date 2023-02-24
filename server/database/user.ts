@@ -1,34 +1,19 @@
 import User from "../types/user"
 import { DBContext } from "./"
 
-export default function attachMessageHandlers(this: DBContext) {
-    this.updateUser = (user: User): void => {
-        // console.log(user)
-        // this.db.run(`
-        //     INSERT INTO user (name)
-        //     VALUES (?)
-        // `, user.name)
-        if (user.id in this.fakeDB.users) {
-            this.fakeDB.users = {
-                ...this.fakeDB.users,
-                [user.id]: {
-                    ...this.fakeDB.users[user.id],
-                    ...user,
-                }
-            }
+export async function updateUser(this: DBContext, user: User): Promise<number | undefined> {
+    return await this.db.transaction(async (t) => {
+        const [ existingUser ] = await t("users").where({ id: user.id }).select("*")
+        if (existingUser !== undefined) {
+            return
         }
-        else {
-            this.fakeDB.users = {
-                ...this.fakeDB.users,
-                [user.id]: user
-            }
-        }
-    }
+        const userToInsert = { ...user }
+        delete userToInsert.id
+        const [ result ] = await t("users").insert(userToInsert)
+        return result
+    })    
+}
 
-    this.getUsers = async () => {
-        // const result = await this.db.all<User[]>(`
-        //     SELECT * FROM user
-        // `)
-        return Object.values(this.fakeDB.users)
-    }
+export async function getUsers(this: DBContext) {
+    return await this.db("users").select("*")
 }

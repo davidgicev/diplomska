@@ -6,7 +6,7 @@ export default class ServerHandler {
     
     channel: RTCDataChannel
     
-    constructor(context: WebSocketClient, channel: RTCDataChannel, id: string) {
+    constructor(context: WebSocketClient, channel: RTCDataChannel, id: number) {
         this.context = context
         this.channel = channel
 
@@ -36,6 +36,6 @@ export default class ServerHandler {
             return
         }
 
-        this.context.context.state.actions.addNewMessage(message.data)
+        this.context.context.state.actions.upsertMessage(message.data)
     }
 }

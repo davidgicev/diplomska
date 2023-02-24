@@ -2,6 +2,7 @@ import React from "react"
 import { AuthContext } from "../../authStore/store"
 import { useNavigate } from "react-router-dom"
 import { saveUser } from "../../api/localStorage/auth"
+import { registerUser } from "../../api/auth"
 
 export default function LoginScreen(): JSX.Element {
     const navigate = useNavigate()
@@ -12,9 +13,18 @@ export default function LoginScreen(): JSX.Element {
         setUsername(event.target.value)
     }
 
-    const login = () => {
-        setUserData({ id: username })
-        saveUser({ id: username })
+    const login = async () => {
+        const result = await registerUser({
+            id: -1,
+            username,
+        })
+        if (!result) {
+            return
+        }
+        const { id, token } = result
+        const savedUser = { id, token, username }
+        setUserData(savedUser)
+        saveUser(savedUser)
         navigate("/home")
     }
 

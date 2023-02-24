@@ -1,11 +1,13 @@
-import { getChatMessages } from "../api/messages"
+import { syncChats } from "../api/sync/chats"
+import { syncMessages } from "../api/sync/messages"
+import { syncUsers } from "../api/sync/users"
 import { updateChat } from "../handler/chat"
 import { updateMessage } from "../handler/message"
 import { updateUser } from "../handler/user"
 import { StoreProvider } from "./StoreProvider"
 
 export const actions = {
-    addNewUser(this: StoreProvider, user: Store.User) {
+    upsertUser(this: StoreProvider, user: Store.User) {
         console.log("Store: adding new user", user)
         // this.setState((state) => ({
         //     users: {
@@ -16,7 +18,7 @@ export const actions = {
         updateUser(user)
     },
 
-    async addNewChat(this: StoreProvider, chat: Store.Chat) {
+    async upsertChat(this: StoreProvider, chat: Store.Chat) {
         console.log("Store: adding new chat", chat)
 
         // this.setState((state) => {
@@ -40,7 +42,7 @@ export const actions = {
         this.setState({ activeChatId })
     },
 
-    addNewMessage(this: StoreProvider, message: Store.Message) {
+    upsertMessage(this: StoreProvider, message: Store.Message) {
         this.setState((state) => {
             const newMessages = { ...state.messages }
 
@@ -57,15 +59,36 @@ export const actions = {
         })
     },
 
-    sendMessage(this: StoreProvider, message: Store.Message, chatUserIds: string[]) {
+    sendMessage(this: StoreProvider, message: Store.Message, chatUserIds: number[]) {
         console.log("Store: Sending new message", message)
-        this.state.actions.addNewMessage(message)
+        this.state.actions.upsertMessage(message)
         this.client?.serverHandler.send({
-            type: "newMessage",
+            type: "upsertMessage",
             data: message
         })
         for (const id of chatUserIds) {
             this.client?.sendMessage(id, message)
+        }
+    },
+
+    async syncUsers(this: StoreProvider) {
+        const users = await syncUsers()
+        for (const user of users) {
+            this.state.actions.upsertUser(user)
+        }
+    },
+    
+    async syncChats(this: StoreProvider) {
+        const chats = await syncChats()
+        for (const chat of chats) {
+            this.state.actions.upsertChat(chat)
+        }
+    },
+
+    async syncMessages(this: StoreProvider) {
+        const messages = await syncMessages()
+        for (const message of messages) {
+            this.state.actions.upsertMessage(message)
         }
     }
 }

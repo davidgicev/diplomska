@@ -1,16 +1,15 @@
 import Message from "../types/message"
 import Server from "../Server"
 
-export function updateMessage(server: Server, message: Message) {
+export async function updateMessage(server: Server, message: Message) {
     const {
         id,
         chatId,
     } = message
 
     const tempId = id.startsWith("temp") ? id : undefined
-    const newId = server.db.updateMessage(message)
-    console.log(server.db.fakeDB.chats)
-    const { userIds } = server.db.fakeDB.chats[chatId]
+    const newId = await server.db.updateMessage(message)
+    const userIds: number[] = (await server.db.db("usersChats").where({ chatId }).select('userId')).map(r => r.userId)
 
     const connections = server.ws.users
     for (const userId of userIds) {
@@ -19,10 +18,10 @@ export function updateMessage(server: Server, message: Message) {
         }
         const connection = connections[userId]
         server.ws.sendTo(connection, {
-            type: "newMessage",
+            type: "upsertMessage",
             data: {
                 ...message,
-                id: newId ? newId : id,
+                id: (newId !== undefined ? newId : id).toString(),
                 tempId,
             }
         })

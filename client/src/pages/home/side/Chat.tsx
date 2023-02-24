@@ -23,7 +23,7 @@ export default function Chat(props: Props): JSX.Element {
 
             <div className="flex flex-col flex-1 overflow-hidden">
                 <p className="text-lg">
-                    {data.title}
+                    {data.id}
                 </p>
 
                 {/* {

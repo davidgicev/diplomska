@@ -1,6 +1,6 @@
 declare namespace Store {
     interface User {
-        id: string
+        id: number
         username?: string
         firstName?: string
         lastName?: string
@@ -9,18 +9,19 @@ declare namespace Store {
 
     interface Message {
         id: string
+        tempId: string
         chatId: string
-        fromUserId: string
+        tempChatId: string
+        fromUserId: number
         date: number
         content: string
-        tempId: string
     }
 
     type Chat = {
         id: string
         tempId: string
         type: "private" | "group"
-        userIds: string[]
+        userIds: number[]
         title?: string
         photo?: string
     }

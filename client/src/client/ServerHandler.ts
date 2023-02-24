@@ -12,7 +12,7 @@ export default class ServerHandler {
     
     constructor(context: WebSocketClient) {
         this.context = context
-        console.log(this.context.userId)
+        console.log("alo?", this.context.userId)
         this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.userId)
         this.serverConnection.onopen = () => {
             console.log("otvorjeno konekcija so server")
@@ -32,15 +32,15 @@ export default class ServerHandler {
 
     handlers = {
         userLeft: this.handleUserLeft.bind(this),
-        newUser: this.handleNewUser.bind(this),
+        upsertUser: this.handleUpsertUser.bind(this),
         error: this.handleError.bind(this),
         loginResponse: this.handleLoginResponse.bind(this),
         loginRequest: this.handleLoginRequest.bind(this),
         answer: this.handleAnswer.bind(this),
         candidate: this.handleCandidate.bind(this),
         offer: this.handleOffer.bind(this),
-        newChat: this.handleNewChat.bind(this),
-        newMessage: this.handleNewMessage.bind(this),
+        upsertChat: this.handleUpsertChat.bind(this),
+        upsertMessage: this.handleUpsertMessage.bind(this),
     }
 
     handleOpen() {
@@ -68,7 +68,7 @@ export default class ServerHandler {
             return 
         }
 
-        this.context.context.state.actions.addNewUser({
+        this.context.context.state.actions.upsertUser({
             id: this.context.userId,
         })
 
@@ -77,43 +77,44 @@ export default class ServerHandler {
         for (const id of userIds) {
             this.initPeerConnection(id)
             this.makeOffer(id)
-            this.context.context.state.actions.addNewUser({
+            this.context.context.state.actions.upsertUser({
                 id,
+                // username: message.data.username
             })
         }
     };
     
-    handleNewUser(message: WSMessage) {
-        if (message.type !== "newUser") {
+    handleUpsertUser(message: WSMessage) {
+        if (message.type !== "upsertUser") {
             return
         }
         const id = message.data.id
         this.initPeerConnection(id)
-        this.context.context.state.actions.addNewUser({
+        this.context.context.state.actions.upsertUser({
             id,
         })
     }
 
-    handleNewChat(message: WSMessage) {
-        if (message.type !== "newChat") {
+    handleUpsertChat(message: WSMessage) {
+        if (message.type !== "upsertChat") {
             return
         }
         const data = message.data
-        this.context.context.state.actions.addNewChat({
+        this.context.context.state.actions.upsertChat({
             id: data.id,
             type: "private",
             userIds: data.userIds,
-            title: data.title || data.userIds.find(id => id !== this.context.userId) || this.context.userId,
+            title: data.title,
             tempId: ""
         })
     }
 
-    handleNewMessage(message: WSMessage) {
-        if (message.type !== "newMessage") {
+    handleUpsertMessage(message: WSMessage) {
+        if (message.type !== "upsertMessage") {
             return
         }
 
-        this.context.context.state.actions.addNewMessage(message.data)
+        this.context.context.state.actions.upsertMessage(message.data)
     }
     
     async handleOffer(message: WSMessage) {
@@ -149,7 +150,7 @@ export default class ServerHandler {
         this.serverConnection.send(JSON.stringify(message)); 
     }
 
-    async makeOffer(targetUserId: string) {         
+    async makeOffer(targetUserId: number) {         
         const peer = this.context.peerConnections[targetUserId]
         const offer = await peer?.createOffer()
         if (!offer) {
@@ -172,7 +173,7 @@ export default class ServerHandler {
         this.send({ 
             type: "loginRequest", 
             data: {
-                id: this.context.userId
+                id: this.context.userId,
             },
          }); 
     }
@@ -212,7 +213,7 @@ export default class ServerHandler {
         console.log(message.data)
     }
 
-    initDataChannel(peer: RTCPeerConnection, id: string) {
+    initDataChannel(peer: RTCPeerConnection, id: number) {
         const dataChannel = peer.createDataChannel("main")
 
     
@@ -223,7 +224,7 @@ export default class ServerHandler {
         return dataChannel
     }
     
-    initPeerConnection(id: string) {
+    initPeerConnection(id: number) {
         const peer = new RTCPeerConnection(configuration)
     
         peer.onicecandidate = (event) => { 

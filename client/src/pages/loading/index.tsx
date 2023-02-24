@@ -16,6 +16,7 @@ export default function LoadingScreen() {
             return navigate("/login")
 
         setUserData(JSON.parse(data));
+        console.log(JSON.parse(data))
         navigate("/home")
     }, [setUserData, navigate]);
 

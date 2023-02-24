@@ -1,33 +1,43 @@
 import Chat from "../types/chat"
 import { DBContext } from "./"
 
-export default function attachChatHandlers(this: DBContext) {
-    this.updateChat = (chat: Chat): void => {
-        if (chat.id in this.fakeDB.chats) {
-            this.fakeDB.chats = {
-                ...this.fakeDB.chats,
-                [chat.id]: {
-                    ...this.fakeDB.chats[chat.id],
-                    ...chat,
-                }
+export async function updateChat(this: DBContext, chat: Chat): Promise<string | undefined> {
+    return await this.db.transaction(async (t) => {
+        let newId: number | undefined;
+        if (chat.id.startsWith("temp") || chat.id === "") {
+            [newId] = await t("chats").insert({
+                tempId: chat.tempId,
+                title: chat.title,
+                type: chat.type,
+            })
+            for (const userId of chat.userIds) {
+                await t("usersChats").insert({
+                    userId,
+                    chatId: newId ?? chat.id,
+                })
             }
         }
         else {
-            this.fakeDB.chats = {
-                ...this.fakeDB.chats,
-                [chat.id]: chat,
-            }
+            [newId] = await t("chats").update({
+                id: chat.id,
+                tempId: chat.tempId,
+                title: chat.title,
+                type: chat.type,
+            })
+            
+            // add/remove lugje chat
+            // for (const userId of chat.userIds) {
+            //     await t("usersChats").update({
+            //         userId,
+            //         chatId: newId ?? chat.id,
+            //     })
+            // }
         }
-        // this.db.run(`
-        //     INSERT INTO user (name)
-        //     VALUES (?)
-        // `, user.name)
-    }
 
-    this.getChats = async () => {
-        // const result = await this.db.all<User[]>(`
-        //     SELECT * FROM user
-        // `)
-        return Object.values(this.fakeDB.chats)
-    }
+        return newId?.toString()
+    })
+}
+
+export async function getChats(this: DBContext) {
+    return Object.values(this.fakeDB.chats)
 }
