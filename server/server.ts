@@ -7,6 +7,7 @@ import { addUserRoute } from "./routes/User"
 import { addChatRoute } from "./routes/Chat"
 import bodyParser from "body-parser"
 import WebSocketServer from "./WebSocketServer"
+import { SyncManager } from "./syncing"
 
 export default class Server {
     ws: WebSocketServer

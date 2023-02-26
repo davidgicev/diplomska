@@ -1,5 +1,4 @@
 import React from "react";
-import { StoreContext } from "../../../store/store";
 import Chat from "./Chat";
 import StatusCard from "./StatusCard";
 import { db } from "../../../database";

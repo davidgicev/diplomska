@@ -1,3 +1,5 @@
+import { SPMessage } from "../../../syncing/protocolMessageTypes"
+
 export type WSMessage = {
     type: "loginRequest",
     data: {
@@ -30,11 +32,14 @@ export type WSMessage = {
         targetUserId: number
         SDU: RTCSessionDescriptionInit
     }
-} | {
+} 
+
+| 
+
+{
     type: "upsertUser",
     data: {
         id: number
-        username: string
     }
 } | {
     type: "upsertChat",
@@ -44,6 +49,7 @@ export type WSMessage = {
         title: string
         photo: string
         userIds: number[]
+        lastUpdated: number
     }
 } | {
     type: "upsertMessage",
@@ -55,13 +61,18 @@ export type WSMessage = {
         fromUserId: number
         content: string
         date: number
+        lastUpdated: number
     }
 } | {
     type: "userLeft",
     data: {
         id: number
     }
-} | {
+} 
+
+| SPMessage
+
+| {
     type: "error",
     data: {
         message: string

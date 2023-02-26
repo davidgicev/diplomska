@@ -1,10 +1,11 @@
 declare namespace Store {
     interface User {
         id: number
-        username?: string
-        firstName?: string
-        lastName?: string
-        photo?: string
+        username: string
+        firstName: string
+        lastName: string
+        photo: string
+        lastUpdated: number
     }
 
     interface Message {
@@ -15,6 +16,7 @@ declare namespace Store {
         fromUserId: number
         date: number
         content: string
+        lastUpdated: number
     }
 
     type Chat = {
@@ -22,15 +24,22 @@ declare namespace Store {
         tempId: string
         type: "private" | "group"
         userIds: number[]
-        title?: string
-        photo?: string
+        title: string
+        photo: string
+        lastUpdated: number
+    }
+
+    interface UserState {
+        id: number
+        connected: boolean
     }
 
     type Actions = import("./actions").Actions
     
     interface Context {
         client: {
-            serverConnectionStatus: "connected" | "offline"
+            serverConnectionStatus: "connected" | "offline",
+            users: Record<number, UserState>
         }
         activeChatId?: string
         users: Record<string, User>

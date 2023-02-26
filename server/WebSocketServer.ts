@@ -2,19 +2,21 @@ import WebSocket, { WebSocketServer as WSServer } from "ws"
 import { WSMessage } from "./types/WSMessage"
 import { updateChat } from "./handlers/chat";
 import { updateMessage } from "./handlers/message";
-import { updateUser } from "./handlers/user";
+import { updateUser, userLoggedIn } from "./handlers/user";
 import Server from "./Server";
+import { SyncManager } from "./syncing";
 
 export default class WebSocketServer {
    context: Server
    server: WSServer;
    users: Record<number, WebSocket.WebSocket>
-   connections: Record<string, WebSocket.WebSocket>
+   syncer: SyncManager
 
    constructor(context: Server) {
       this.context = context
       const server = new WSServer({ port: 9000 })
       this.server = server
+      this.syncer = new SyncManager(this)
       this.users = {}
       server.on('connection', (connection, request) =>  {
          
@@ -71,9 +73,9 @@ export default class WebSocketServer {
 
                      console.log(body.data)
 
-                     updateUser(this.context, {
-                        id: userId,
-                     })
+                     userLoggedIn(this.context, body.data.id)
+                     // tuka naprai sync yes yes
+                     // console.log(this.context.syncer.makeSyncMessage(body.data.id))
                   }
                   
                   break;
@@ -136,6 +138,17 @@ export default class WebSocketServer {
                   const message = body.data
                   updateMessage(this.context, message)
 
+                  break;
+               }
+
+               case "syncResponseShallow": {
+
+                  this.syncer.handleSyncResponseShallow(body, userId)
+                  break;
+               }
+
+               case "syncResponseMessages": {
+                  this.syncer.handleSyncResponseMessages(body, userId)
                   break;
                }
 

@@ -20,7 +20,7 @@ export default function Main(): JSX.Element {
     console.log("avtenticiran e", data)
 
     return (
-        <StoreProvider userId={data.id}>
+        <StoreProvider user={data}>
             <HomeScreen />
         </StoreProvider>
     )

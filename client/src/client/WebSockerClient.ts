@@ -1,24 +1,27 @@
 import { StoreProvider } from "../store/StoreProvider"
+import { SyncManager } from "../syncing/manager"
 import { RTCMessage } from "../types/RTCMessage"
 import ServerHandler from "./ServerHandler"
 
 export default class WebSocketClient {
     context: StoreProvider
-    userId: number
+    user: AuthStore.User
     
     serverHandler: ServerHandler
+    syncManager: SyncManager
 
     peerConnections: Record<string, RTCPeerConnection> = {}
     dataChannels: Record<string, RTCDataChannel> = {}
 
-    constructor(context: StoreProvider, userId: number) {
+    constructor(context: StoreProvider, user: AuthStore.User) {
         this.context = context
-        this.userId = userId
+        this.user = user
         this.serverHandler = new ServerHandler(this)
+        this.syncManager = new SyncManager()
     }
 
     sendMessage(targetUserId: number, message: Store.Message) {
-        if (targetUserId === this.userId) {
+        if (targetUserId === this.user.id) {
             return
         }
         console.log("probuvam da pratam poraka do", targetUserId, "porakata e", message)

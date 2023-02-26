@@ -1,3 +1,5 @@
+import { SPMessage } from "../../syncing/protocolMessageTypes"
+
 export type WSMessage = {
     type: "loginRequest",
     data: {
@@ -30,7 +32,11 @@ export type WSMessage = {
         targetUserId: number
         SDU: string
     }
-} | {
+} 
+
+|
+
+{
     type: "upsertUser",
     data: {
         id: number,
@@ -60,9 +66,15 @@ export type WSMessage = {
     data: {
         id: number
     }
-} | {
+} 
+
+| 
+
+{
     type: "error",
     data: {
         message: string
     }
 }
+
+| SPMessage

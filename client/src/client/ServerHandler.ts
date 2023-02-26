@@ -1,6 +1,7 @@
 import { WSMessage } from "../types/WSMessage";
 import PeerHandler from "./PeerHandler";
 import WebSocketClient from "./WebSockerClient";
+import { handleSyncResponseMessages, handleSyncResponseShallow } from "./syncing";
 
 var configuration: RTCConfiguration = {
     iceServers: [{ urls: "stun:stun2.1.google.com:19302" }] 
@@ -12,8 +13,8 @@ export default class ServerHandler {
     
     constructor(context: WebSocketClient) {
         this.context = context
-        console.log("alo?", this.context.userId)
-        this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.userId)
+        console.log("alo?", this.context.user)
+        this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
         this.serverConnection.onopen = () => {
             console.log("otvorjeno konekcija so server")
             // this.context.setState({
@@ -41,6 +42,8 @@ export default class ServerHandler {
         offer: this.handleOffer.bind(this),
         upsertChat: this.handleUpsertChat.bind(this),
         upsertMessage: this.handleUpsertMessage.bind(this),
+        syncResponseShallow: handleSyncResponseShallow.bind(this),
+        syncResponseMessages: handleSyncResponseMessages.bind(this)
     }
 
     handleOpen() {
@@ -68,19 +71,13 @@ export default class ServerHandler {
             return 
         }
 
-        this.context.context.state.actions.upsertUser({
-            id: this.context.userId,
-        })
+        // this.context.context.state.actions.syncWithServer()
 
-        const userIds = message.data.userIds.filter(id => id !== this.context.userId)
+        const userIds = message.data.userIds.filter(id => id !== this.context.user.id)
     
         for (const id of userIds) {
             this.initPeerConnection(id)
             this.makeOffer(id)
-            this.context.context.state.actions.upsertUser({
-                id,
-                // username: message.data.username
-            })
         }
     };
     
@@ -90,9 +87,7 @@ export default class ServerHandler {
         }
         const id = message.data.id
         this.initPeerConnection(id)
-        this.context.context.state.actions.upsertUser({
-            id,
-        })
+        // this.context.context.state.actions.syncWithServer()
     }
 
     handleUpsertChat(message: WSMessage) {
@@ -105,7 +100,9 @@ export default class ServerHandler {
             type: "private",
             userIds: data.userIds,
             title: data.title,
-            tempId: ""
+            tempId: "",
+            lastUpdated: data.lastUpdated,
+            photo: ""
         })
     }
 
@@ -139,15 +136,17 @@ export default class ServerHandler {
         this.send({ 
             type: "answer", 
             data: {
-                targetUserId: message.data.targetUserId,
+                targetUserId: userId,
                 SDU: answer,
             }
         }); 
-        
+        this.context.context.state.actions.addUserConnection(userId)
     };
 
     send(message: WSMessage) {
-        this.serverConnection.send(JSON.stringify(message)); 
+        try {
+            this.serverConnection.send(JSON.stringify(message)); 
+        } catch(e) {}
     }
 
     async makeOffer(targetUserId: number) {         
@@ -169,11 +168,11 @@ export default class ServerHandler {
     }
 
     async login() {
-        console.log(this.context.userId)
         this.send({ 
             type: "loginRequest", 
             data: {
-                id: this.context.userId,
+                id: this.context.user.id,
+                token: this.context.user.token,
             },
          }); 
     }
@@ -185,6 +184,7 @@ export default class ServerHandler {
     
         const id = message.data.targetUserId
         this.context.peerConnections[id]?.setRemoteDescription(new RTCSessionDescription(message.data.SDU)); 
+        this.context.context.state.actions.addUserConnection(id)
     };
     
     handleCandidate(message: WSMessage) {

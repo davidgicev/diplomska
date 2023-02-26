@@ -1,12 +1,25 @@
-import { syncChats } from "../api/sync/chats"
-import { syncMessages } from "../api/sync/messages"
-import { syncUsers } from "../api/sync/users"
 import { updateChat } from "../handler/chat"
 import { updateMessage } from "../handler/message"
 import { updateUser } from "../handler/user"
 import { StoreProvider } from "./StoreProvider"
 
 export const actions = {
+
+    addUserConnection(this: StoreProvider, userId: number) {
+        this.setState((state) => ({
+            client: {
+                ...state.client,
+                users: {
+                    ...state.client.users,
+                    [userId]: {
+                        ...state.client.users[userId],
+                        connected: true,
+                    }
+                }
+            }
+        }))
+    },
+
     upsertUser(this: StoreProvider, user: Store.User) {
         console.log("Store: adding new user", user)
         // this.setState((state) => ({
@@ -59,38 +72,37 @@ export const actions = {
         })
     },
 
-    sendMessage(this: StoreProvider, message: Store.Message, chatUserIds: number[]) {
+    sendMessage(this: StoreProvider, message: Store.Message) {
         console.log("Store: Sending new message", message)
         this.state.actions.upsertMessage(message)
         this.client?.serverHandler.send({
             type: "upsertMessage",
             data: message
         })
-        for (const id of chatUserIds) {
-            this.client?.sendMessage(id, message)
-        }
+        // for (const id of chatUserIds) {
+        //     this.client?.sendMessage(id, message)
+        // }
     },
 
-    async syncUsers(this: StoreProvider) {
-        const users = await syncUsers()
-        for (const user of users) {
-            this.state.actions.upsertUser(user)
-        }
-    },
-    
-    async syncChats(this: StoreProvider) {
-        const chats = await syncChats()
-        for (const chat of chats) {
-            this.state.actions.upsertChat(chat)
-        }
-    },
+    async syncWithServer(this: StoreProvider) {
 
-    async syncMessages(this: StoreProvider) {
-        const messages = await syncMessages()
-        for (const message of messages) {
-            this.state.actions.upsertMessage(message)
+        const syncBody = await this.client?.syncManager.makeShallowSyncBody()
+
+        if (!syncBody) {
+            return
         }
-    }
+
+        syncBody && this.client?.serverHandler.send({
+            type: "syncResponseShallow",
+            data: {
+                syncBody: syncBody.packet,
+                changes: {
+                    chats: [],
+                    users: []
+                }
+            }
+        })
+    },
 }
 
 export type Actions = typeof actions

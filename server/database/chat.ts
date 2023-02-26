@@ -38,6 +38,10 @@ export async function updateChat(this: DBContext, chat: Chat): Promise<string | 
     })
 }
 
-export async function getChats(this: DBContext) {
-    return Object.values(this.fakeDB.chats)
+export async function getChats(this: DBContext): Promise<Chat[]> {
+    return await this.db("chats").select("*")
+}
+
+export async function getChatsForUser(this: DBContext, userId: number): Promise<Chat[]> {
+    return await this.db("chats").select("*").where({ id: userId })
 }

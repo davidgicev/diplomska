@@ -1,6 +1,6 @@
 import Dexie from "dexie";
 
-class Database extends Dexie {
+export class Database extends Dexie {
     users!:    Dexie.Table<Store.User, number>
     chats!:    Dexie.Table<Store.Chat, string>
     messages!: Dexie.Table<Store.Message, string>
@@ -9,9 +9,9 @@ class Database extends Dexie {
         super("Database")
 
         this.version(1).stores({
-            chats: "id",
+            chats: "id, tempId",
             users: "id",
-            messages: "id, chatId", 
+            messages: "id, chatId, tempId", 
         })
     }
 }

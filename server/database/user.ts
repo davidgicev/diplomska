@@ -14,6 +14,6 @@ export async function updateUser(this: DBContext, user: User): Promise<number | 
     })    
 }
 
-export async function getUsers(this: DBContext) {
+export async function getUsers(this: DBContext): Promise<User[]> {
     return await this.db("users").select("*")
 }

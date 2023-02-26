@@ -1,14 +1,13 @@
 import { Request, Response } from "express"
 import User from "../types/user"
-import Server from "server/Server"
+import Server from "../Server"
+import { initializeUser } from "../handlers/user"
 
 export function addUserRoute(server: Server) {
     server.app.post("/api/registerUser", async (req: Request, res: Response): Promise<void> => {
-        const {
-            username, id
-        }: User = req.body
+        const user: User = req.body
 
-        const generatedId = await server.db.updateUser({username, id})
+        const generatedId = await initializeUser(server, user)
         res.send({
             id: generatedId,
             token: generatedId,

@@ -7,7 +7,6 @@ import { db } from "../../../database";
 import { useLiveQuery } from "dexie-react-hooks";
 
 export default function Layout(): JSX.Element {
-
     const { activeChatId } = React.useContext(StoreContext)
     const chat = useLiveQuery(async () => {
         if (!activeChatId) {

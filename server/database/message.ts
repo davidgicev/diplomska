@@ -19,6 +19,10 @@ export async function updateMessage (this: DBContext, message: Message): Promise
     })
 }
 
-export async function getMessages(this: DBContext) {
-    return [] as Message[]
+export async function getMessages(this: DBContext): Promise<Message[]> {
+    return this.db("messages").select("*")
+}
+
+export async function getMessagesForChat(this: DBContext, chatId: number): Promise<Message[]> {
+    return this.db("messages").select("*").where({ chatId })
 }

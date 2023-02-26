@@ -1,7 +1,93 @@
-import User from "../types/user"
+import User from "server/types/user"
 import Server from "../Server"
 import { updateChat } from "./chat"
 import Chat from "server/types/chat"
+
+export async function userLoggedIn(server: Server, userId: number) {
+    const connections = server.ws.users
+    for (const id in connections) {
+        const connection = connections[id]
+        server.ws.sendTo(connection, {
+            type: "upsertUser",
+            data: {
+                id: userId,
+            }
+        })
+    }
+}
+
+export async function initializeUser(server: Server, user: User) {
+    const newUserId = (await server.db.updateUser(user)) ?? user.id
+
+    await server.db.db.transaction(async (db) => {
+        {
+            // check if new user has chat with self
+            const existingPrivateChatId = (await db.raw(`
+                                                SELECT * from usersChats
+                                                JOIN chats on usersChats.chatId = chats.id
+                                                WHERE type = 'private' AND usersChats.userId = ?
+                                                GROUP BY usersChats.chatId
+                                                HAVING COUNT(*) = 1
+                                            `, [newUserId]))[0]?.chatId
+            
+            if (existingPrivateChatId === undefined) {
+                const id = await db("chats").insert({
+                    title: "Saved Messages",
+                    type: "private",
+                    tempId: "",
+                } as Chat)
+
+                await db("usersChats").insert({
+                    userId: newUserId,
+                    chatId: id, 
+                })
+            }
+            else {
+                // // ova ke ne treba vo idnina
+                // const [ existingChat ] = await server.db.db("chats").where({ id: existingPrivateChatId }).select("*")
+                // server.ws.sendTo(server.ws.users[newUserId], {
+                //     type: "upsertChat",
+                //     data: existingChat,
+                // })
+            }
+        }
+    
+        const users = await db("users").select("*")
+    
+        for (const user of users) {
+            const userId = user.id
+            if (user.id === newUserId) {
+                continue
+            }
+            const existingPrivateChatId = (await db.raw(`
+                                                SELECT * from usersChats
+                                                JOIN chats on usersChats.chatId = chats.id
+                                                WHERE type = 'private' AND
+                                                (usersChats.userId = ? OR usersChats.userId = ? )
+                                                GROUP BY usersChats.chatId
+                                                HAVING COUNT(*) = 2
+                                            `, [user.id, newUserId]))[0]?.chatId
+    
+            if (existingPrivateChatId === undefined) {
+                const newChatId = await db("chats").insert({
+                    title: "",
+                    type: "private",
+                    tempId: "",
+                } as Chat)
+                await db("usersChats").insert({
+                    userId: newUserId,
+                    chatId: newChatId
+                })
+                await db("usersChats").insert({
+                    userId: userId,
+                    chatId: newChatId
+                })
+            }
+        }
+    })
+
+    return newUserId
+}
 
 export async function updateUser(server: Server, user: User) {
     const connections = server.ws.users
@@ -44,8 +130,6 @@ export async function updateUser(server: Server, user: User) {
             })
         }
     }
-
-
 
     for (const userId in connections) {
         const userIdAsNumber = Number(userId)

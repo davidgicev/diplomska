@@ -3,7 +3,7 @@ import { StoreContext, getBindedActions } from "./store";
 import WebSocketClient from "../client/WebSockerClient";
 
 interface Props {
-    userId: number
+    user: AuthStore.User
     children: React.ReactNode
 }
 
@@ -15,6 +15,7 @@ export class StoreProvider extends React.Component<Props, Store.Context> {
         this.state = {
             client: {
                 serverConnectionStatus: "offline",
+                users: {}
             },
             chats: {},
             users: {},
@@ -24,8 +25,7 @@ export class StoreProvider extends React.Component<Props, Store.Context> {
     }
 
     componentDidMount(): void {
-        console.log(this.props.userId)
-        this.client = new WebSocketClient(this, this.props.userId)
+        this.client = new WebSocketClient(this, this.props.user)
     }
 
     render(): React.ReactNode {
