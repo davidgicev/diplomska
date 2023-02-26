@@ -2,6 +2,7 @@ import { SHA256 } from "crypto-js"
 import MerkleTree from "merkletreejs"
 import { MTHash, MessagesSyncBody, ShallowSyncBody } from "./protocolMessageTypes"
 import { Chat, Message, User } from "./protocolObjectTypes"
+import { sha1 } from "object-hash"
 
 type Difference = {
     type: "change",
@@ -12,6 +13,20 @@ type Difference = {
 } | {
     type: "insertionIncoming",
     key: string
+}
+
+export function checkIfMTHashIsDifferent(current: MTHash, other: MTHash): boolean {
+    if (!current && !other) {
+        return false
+    }
+    const currentKeys = current ? Object.keys(current) : []
+    const otherKeys = other ? Object.keys(other) : []
+
+    if (currentKeys.length === otherKeys.length && currentKeys.length === 1 && currentKeys[0] === otherKeys[0]) {
+        return false
+    }
+
+    return true
 }
 
 export function findDifferenceBetweenShallow(current: MTHash, other: MTHash): Difference[] {
@@ -80,22 +95,22 @@ export function traverseToEnd(node: MTHash): string[] {
 export interface DBUtils {
     getUsers: () => Promise<User[]>
     getChats: () => Promise<Chat[]>
-    getMessagesForChat: (id: number) => Promise<Message[]>
+    getMessagesForChat: (id: string | number) => Promise<Message[]>
 }
 
 export async function makeShallowSyncBody(utils: DBUtils): Promise<ShallowSyncBody> {
     const users = await utils.getUsers()
-    const hashedUsers = users.map(u => SHA256(JSON.stringify(u)))
+    const hashedUsers = users.map(u => sha1(u))
     const usersObject = new MerkleTree(hashedUsers)
 
     const chats = await utils.getChats()
-    const hashedChats = chats.map(c => SHA256(JSON.stringify(c)))
+    const hashedChats = chats.map(c => sha1(c))
     const chatsObject = new MerkleTree(hashedChats)
 
     const hashedMessages = []
     for (const chat of chats) {
-        const messages = await utils.getMessagesForChat(Number(chat.id))
-        hashedMessages.push(SHA256(messages.map(m => SHA256(JSON.stringify(m))).join("")))
+        const messages = await utils.getMessagesForChat(chat.id)
+        hashedMessages.push(SHA256(messages.map(m => sha1(m)).join("")))
     }
     const messagesObject = new MerkleTree(hashedMessages)
     
@@ -118,13 +133,13 @@ export async function makeMessagesSyncBody(utils: DBUtils, chatIds: number[]): P
     for (const chatId of chatIds) {
         const chatIdAsNumber = Number(chatId)
         const messages = await utils.getMessagesForChat(chatIdAsNumber)
-        const hashedMessages = messages.map(m => SHA256(JSON.stringify(m)))
+        const hashedMessages = messages.map(m => sha1(m))
         chats[chatIdAsNumber] = new MerkleTree(hashedMessages)
     }
     
     return {
         packet: {
-            chats: Object.entries(chats).map(([id, tree]) => ({ id: Number(id), tree: tree.getLayersAsObject() }))
+            chats: Object.entries(chats).map(([id, tree]) => ({ id: Number(id), tree: tree.getLayersAsObject() ?? {} }))
         },
         trees: {
             chats: Object.entries(chats).map(([id, tree]) => ({ id: Number(id), tree }))

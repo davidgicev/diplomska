@@ -18,11 +18,19 @@ export default function Layout(): JSX.Element {
     if (!chat)
         return <UnselectedChatPanel />;
 
+    const modified = {...chat}
+
+    if (chat.type === "private") {
+        modified.title = chat.userIds.join(" and ")
+    }
+
     return (
-        <div className="flex flex-col w-[70vw] bg-mint-cream flex-2 justify-between relative shadow-xl">
-            <Header chat={chat} />
-            <Messages chat={chat} />
-            <Input chat={chat} />
+        <div className="relative h-full w-[70vw]">
+            <div className="absolute w-full h-full flex flex-col">
+                <Header chat={modified} />
+                <Messages chat={modified} />
+                <Input chat={modified} />
+            </div>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 export default class Chat {
-    id: string
+    id: string | number
     tempId: string
     userIds: number[]
     title: string

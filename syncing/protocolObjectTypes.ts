@@ -1,5 +1,5 @@
 export type Chat = {
-    id: string
+    id: string | number
     tempId: string
     userIds: number[]
     type: "private" | "group"
@@ -18,9 +18,9 @@ export type User = {
 }
 
 export type Message = {
-    id: string
+    id: string | number
     tempId: string
-    chatId: string
+    chatId: string | number
     tempChatId: string
     fromUserId: number
     date: number

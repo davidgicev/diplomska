@@ -1,10 +1,10 @@
 import Chat from "../types/chat"
 import { DBContext } from "./"
 
-export async function updateChat(this: DBContext, chat: Chat): Promise<string | undefined> {
+export async function updateChat(this: DBContext, chat: Chat): Promise<string | number | undefined> {
     return await this.db.transaction(async (t) => {
         let newId: number | undefined;
-        if (chat.id.startsWith("temp") || chat.id === "") {
+        if (chat.id !== chat.tempId) {
             [newId] = await t("chats").insert({
                 tempId: chat.tempId,
                 title: chat.title,
@@ -34,7 +34,7 @@ export async function updateChat(this: DBContext, chat: Chat): Promise<string | 
             // }
         }
 
-        return newId?.toString()
+        return newId
     })
 }
 

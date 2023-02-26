@@ -3,13 +3,16 @@ import Chat from "./Chat";
 import StatusCard from "./StatusCard";
 import { db } from "../../../database";
 import { useLiveQuery } from "dexie-react-hooks";
+import { StoreContext } from "../../../store/store";
 
 
 export default function Panel() {
 
     const chats = useLiveQuery(async () => {
         return await db.chats.toArray()
-    }) || []
+    }, [], [])
+
+    const { actions: { createNewChat } } = React.useContext(StoreContext)
 
     // chats.sort((a:Chat, b:Chat) => {
     //     if(a.messages.length == 0 && b.messages.length == 0)
@@ -39,6 +42,8 @@ export default function Panel() {
                 ))
             }
             </div>
+
+            <button onClick={createNewChat}>Nov chat be</button>
 
             <StatusCard />
 

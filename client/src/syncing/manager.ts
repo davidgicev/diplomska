@@ -16,7 +16,7 @@ export class SyncManager {
         getUsers: async() => {
             return await db.users.toArray()
         },
-        getMessagesForChat: async(id: number) => {
+        getMessagesForChat: async(id: string | number) => {
             return await db.messages.where({ chatId: id }).toArray()
         }
     }

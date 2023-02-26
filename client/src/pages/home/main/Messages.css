@@ -1,0 +1,29 @@
+.message {
+    display: flex;
+    white-space: normal;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.message > div:nth-child(2) {
+    max-width: 60%;
+    background-color: lightgray;
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    padding-left: 1.25em;
+    padding-right: 1.25em;
+    margin: 1em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+    border-radius: 2em;
+    box-shadow: -0.2em 0.2em 0.2em rgba(0,0,0,0.2);
+}
+
+.message-self {
+    align-items: flex-end;
+}
+
+.message-self > div:nth-child(2) {
+    background-color: aliceblue;
+    box-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.2);
+}

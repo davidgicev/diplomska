@@ -1,10 +1,10 @@
 import Message from "../types/message";
 import { DBContext } from "./"
 
-export async function updateMessage (this: DBContext, message: Message): Promise<string | undefined> {
+export async function updateMessage (this: DBContext, message: Message): Promise<string | number | undefined> {
     return await this.db.transaction(async (t) => {
         let newId: number | undefined;
-        if (message.id.startsWith("temp")) {
+        if (message.id === message.tempId) {
             const messageWithoutId = {...message}
             delete messageWithoutId.id;
             [newId] = await t("messages").insert(messageWithoutId)
@@ -15,7 +15,7 @@ export async function updateMessage (this: DBContext, message: Message): Promise
             })
         }
 
-        return newId?.toString()
+        return newId
     })
 }
 

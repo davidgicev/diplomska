@@ -5,7 +5,7 @@ import { updateUser } from "server/database/user"
 import { WSMessage } from "server/types/WSMessage"
 import { ShallowSyncBody, ShallowSyncBodyMessage, SyncChanges, MessagesSyncBody, MessagesSyncBodyMessage, SyncChangesMessages, SyncChangesInternal } from "syncing/protocolMessageTypes"
 import { User, Chat, Message } from "syncing/protocolObjectTypes"
-import { DBUtils, findDifferenceBetweenShallow, makeMessagesSyncBody, makeShallowSyncBody } from "../../syncing/helpers"
+import { DBUtils, checkIfMTHashIsDifferent, findDifferenceBetweenShallow, makeMessagesSyncBody, makeShallowSyncBody } from "../../syncing/helpers"
 import WebSocketServer from "server/WebSocketServer"
 
 export class SyncManager {
@@ -136,23 +136,30 @@ export class SyncManager {
                 await db("users").update(user)
             }
             for (const chat of changes.chats) {
+                const userIds = chat.userIds
+                delete chat.userIds
                 if (chat.id === chat.tempId) {
                     // mozhebi treba i da se smenat messages sami po sebe od tuka direkno uwu
                     const modified = { ...chat }
-                    const id = await db("chats").insert(chat)
-                    modified.id = id.toString()
+                    delete modified.id
                     modified.lastUpdated++
+                    await db("chats").where({ tempId: modified.tempId }).delete()
+                    const id = await db("chats").insert(modified)
+                    await Promise.all(userIds.map(userId => db("usersChats").insert({ userId, chatId: id})))
                     continue
                 }
                 const chatIdAsNumber = Number(chat.id)
                 const local: Chat = await db("chats").select("*").where({ id: chatIdAsNumber }).first()
                 if (!local) {
-                    await db("chats").insert(chat)
+                    const id = await db("chats").insert(chat)
+                    await Promise.all(userIds.map(userId => db("usersChats").insert({ userId, chatId: id})))
                     continue
                 }
-                if (local.lastUpdated > chat.lastUpdated) {
+                if (local.lastUpdated >= chat.lastUpdated) {
                     continue
                 }
+                await db("usersChats").where({ chatId: chatIdAsNumber }).delete()
+                await Promise.all(userIds.map(userId => db("usersChats").insert({ userId, chatId: chatIdAsNumber})))
                 await db("chats").update({ ...chat, id: chatIdAsNumber })
             }
 
@@ -164,13 +171,20 @@ export class SyncManager {
                     const chats = (await db.raw(`
                         SELECT *, group_concat(userId) as userIds FROM usersChats
                         JOIN chats ON usersChats.chatId = chats.id
-                        WHERE userId = ?
-                        GROUP BY chats.id
+                        WHERE chats.id IN (
+                            SELECT UC.chatId FROM usersChats as UC WHERE UC.userId = ?
+                        )
+                        GROUP BY chatId
                     `, [userId]))
-                    return chats.map(chat => ({
-                        ...chat,
-                        userIds: chat.userIds.split(",").map(Number)
-                    }))
+                    return chats.map(chat => {
+                        const modified = { ...chat }
+                        delete modified.userId
+                        delete modified.chatId
+                        return {
+                            ...modified,
+                            userIds: chat.userIds.split(",").map(Number),
+                        }
+                    })
                 },
                 getMessagesForChat: async(id: number) => {
                     return await db("messages").where({ chatId: id }).select("*")
@@ -190,9 +204,9 @@ export class SyncManager {
         if (!newChanges) {
             return
         }
-        
-        const hasChangeInUsers = newChanges.users.length > 0
-        const hasChangeInChats = newChanges.chats.length > 0
+
+        const hasChangeInUsers = checkIfMTHashIsDifferent(syncBody.packet.users, message.data.syncBody.users)
+        const hasChangeInChats = checkIfMTHashIsDifferent(syncBody.packet.chats, message.data.syncBody.chats)
         const hasChangeInMessages = !!syncBodyMessages
 
         if (!hasChangeInUsers && !hasChangeInChats) {
@@ -236,10 +250,19 @@ export class SyncManager {
         await this.context.context.db.db.transaction(async (db) => {
             for (const message of changes) {
                 if (message.id === message.tempId) {
-                    const modified = { ...message }
-                    const id = await db("messages").insert(message)
-                    modified.id = id.toString()
-                    modified.lastUpdated++
+                    const local: Message = await db("messages").where({ tempId: message.tempId }).first("*")
+                    if (!local) {
+                        const modified = { ...message }
+                        delete modified.id
+                        modified.lastUpdated++
+                        await db("messages").insert(modified)
+                        continue
+                    }
+                    if (local.lastUpdated >= message.lastUpdated) {
+                        continue
+                    }
+                    await db("messages").where({ id: local.id }).update({...message, id: local.id})
+
                     continue
                 }
 
@@ -249,10 +272,10 @@ export class SyncManager {
                     await db("messages").insert(message)
                     continue
                 }
-                if (local.lastUpdated > message.lastUpdated) {
+                if (local.lastUpdated >= message.lastUpdated) {
                     continue
                 }
-                await db("messages").update({...message, id: messageIdAsNumber})
+                await db("messages").where({ id: messageIdAsNumber }).update({...message, id: messageIdAsNumber})
             }
 
             const utils: DBUtils = {

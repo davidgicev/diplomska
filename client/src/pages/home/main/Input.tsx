@@ -48,7 +48,7 @@ export default function Input(props: Props): JSX.Element {
             fromUserId: data.id,
             tempChatId: props.chat.tempId,
             lastUpdated: 0,
-        })
+        }, props.chat.userIds)
 
     }, [sendMessage, setContent, content, props.chat, data])
     

@@ -1,7 +1,7 @@
 export default class Message {
-    id: string
+    id: string | number
     tempId: string
-    chatId: string
+    chatId: string | number
     tempChatId: string
     content: string
     fromUserId: number

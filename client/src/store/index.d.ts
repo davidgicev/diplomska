@@ -9,9 +9,9 @@ declare namespace Store {
     }
 
     interface Message {
-        id: string
+        id: string | number
         tempId: string
-        chatId: string
+        chatId: string | number
         tempChatId: string
         fromUserId: number
         date: number
@@ -20,7 +20,7 @@ declare namespace Store {
     }
 
     type Chat = {
-        id: string
+        id: string | number
         tempId: string
         type: "private" | "group"
         userIds: number[]
@@ -41,7 +41,7 @@ declare namespace Store {
             serverConnectionStatus: "connected" | "offline",
             users: Record<number, UserState>
         }
-        activeChatId?: string
+        activeChatId?: string | number
         users: Record<string, User>
         chats: Record<string, Chat>
         messages: Record<string, Message>

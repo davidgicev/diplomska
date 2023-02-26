@@ -3,6 +3,7 @@ import { AuthContext } from "../../../authStore/store";
 import MessageBubble from "./MessageBubble";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../../database";
+import "./Messages.css"
 
 interface Props {
     chat: Store.Chat
@@ -10,14 +11,21 @@ interface Props {
 
 export default function Messages(props: Props): JSX.Element {
     const { data } = React.useContext(AuthContext)
+    const ref = React.useRef<HTMLDivElement>(null)
 
     const messages = useLiveQuery(async () => {
         return await db.messages.where("chatId").equals(props.chat.id).toArray()
-    }, [props.chat.id]) || []
+    }, [props.chat.id], [])
 
     const fromUsers = useLiveQuery(async () => {
         return await Promise.all(messages.map(m => db.users.get(m.fromUserId)))
-    }, [messages]) || []
+    }, [messages], [])
+
+    React.useEffect(() => {
+        if (ref.current) {
+            ref.current.scrollTop = ref.current.scrollHeight
+        }
+    }, [messages])
 
     if (!data) {
         return <></>
@@ -26,22 +34,19 @@ export default function Messages(props: Props): JSX.Element {
     console.log(messages)
 
     return (
-        <div className="overflow-y-auto flex-1">
-            <div className="flex flex-col h-[100%]">
-                <div className="flex-1" />
-                <div className="flex flex-col items-center justify-end">
-                    {
-                        messages.map((message, index) => (
-                            <MessageBubble 
-                                message={message}
-                                user={fromUsers[index]}
-                                fromSelf={fromUsers[index]?.id === data.id}
-                                key={message.id}
-                            />
-                        ))
-                    }
-                </div>
-            </div>
+        <div className="h-full overflow-y-scroll" ref={ref}>
+            <div className="h-32" />
+            {
+                messages.map((message, index) => (
+                    <MessageBubble 
+                        message={message}
+                        user={fromUsers[index]}
+                        fromSelf={fromUsers[index]?.id === data.id}
+                        key={message.id}
+                    />
+                ))
+            }
+            <div className="h-4" />
         </div>
     );
 }

@@ -44,7 +44,7 @@ export type WSMessage = {
 } | {
     type: "upsertChat",
     data: {
-        id: string
+        id: string | number
         tempId: string
         title: string
         photo: string
@@ -54,9 +54,9 @@ export type WSMessage = {
 } | {
     type: "upsertMessage",
     data: {
-        id: string
+        id: string | number
         tempId: string
-        chatId: string
+        chatId: string | number
         tempChatId: string
         fromUserId: number
         content: string

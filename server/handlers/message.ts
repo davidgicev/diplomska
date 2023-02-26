@@ -26,7 +26,7 @@ export async function updateMessage(server: Server, message: Message) {
             type: "upsertMessage",
             data: {
                 ...message,
-                id: (newId !== undefined ? newId : id).toString(),
+                id: newId !== undefined ? newId : id,
                 tempId,
                 chatId,
             }

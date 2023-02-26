@@ -131,10 +131,13 @@ export async function handleSyncResponseShallow(this: ServerHandler, message: WS
                     await db.chats.add(chat)
                     continue
                 }
-                await db.chats.put(chat)
+                await db.chats.where("id").equals(chat.tempId).delete()
+
+                const id = await db.chats.add(chat)
+                await db.messages.where("tempChatId").equals(chat.tempId).modify({ chatId: id })
                 continue
             }
-            if (local.lastUpdated > chat.lastUpdated) {
+            if (local.lastUpdated >= chat.lastUpdated) {
                 continue
             }
             await db.chats.put(chat)
@@ -165,6 +168,7 @@ export async function handleSyncResponseShallow(this: ServerHandler, message: WS
             type: "syncResponseMessages",
             data: {
                 syncBody: {
+                    shallowChats: syncBody.packet.messages,
                     chats: Object.fromEntries(syncBodyMessages.packet.chats.map(chat => [chat.id, chat.tree])),
                 },
                 changes: {
@@ -192,37 +196,61 @@ export async function handleSyncResponseMessages(this: ServerHandler, message: W
     const changes = message.data.changes.messages
 
     let newChanges: SyncChangesMessages | undefined;
-    let syncBody: MessagesSyncBody | undefined;
+    let syncBodyMessages: MessagesSyncBody | undefined;
+    let hasChange = false
+    let chatIds: number[] = []
 
     await db.transaction("rw", [db.users, db.chats, db.messages], async () => {
         for (const message of changes) {
             const local = await db.messages.get(message.id)
             if (!local) {
-                const temp = await db.messages.where("tempId").equals(message.tempId).first()
+                const temp = await db.messages.get(message.tempId)
                 if (!temp) {
                     await db.messages.add(message)
                     continue
                 }
-                await db.messages.put(message)
+                await db.messages.where("id").equals(temp.id).delete()
+                await db.messages.add(message)
                 continue
             }
-            if (local.lastUpdated > message.lastUpdated) {
+            if (local.lastUpdated >= message.lastUpdated) {
                 continue
             }
             await db.messages.put(message)
         }
 
         const incoming = message.data.syncBody
-        syncBody = await this.context.syncManager.makeMessagesSyncBody(Object.keys(incoming.chats).map(Number))
+        if (incoming.shallowChats) {
+            const local = await this.context.syncManager.makeShallowSyncBody()
+            const messageDiffs = findDifferenceBetweenShallow(local.packet.messages, incoming.shallowChats)
+            if (messageDiffs.length > 0) {
+                hasChange = true
+            }
+            const messageChangedInChatIds: number[] = []
+            for (const diff of messageDiffs) {
+                if (diff.type === "insertionLocal") {
+                    const chatIndex = local.trees.messages.getLeafIndex(Buffer.from(diff.key, 'hex'))
+                    const chat = (await db.chats.toArray())[chatIndex]
+                    messageChangedInChatIds.push(Number(chat.id))
+                    continue
+                }
+            }
+            chatIds.push(...messageChangedInChatIds)
+        }
+        chatIds.push(...Object.keys(incoming.chats).map(Number))
 
-        newChanges = await generateChangesMessages(syncBody, incoming)
+        syncBodyMessages = await this.context.syncManager.makeMessagesSyncBody(chatIds)
+
+        newChanges = await generateChangesMessages(syncBodyMessages, incoming)
     })
 
-    if (newChanges && newChanges.messages.length === 0) {
+    
+
+    if (newChanges && newChanges.messages.length === 0 && !hasChange) {
         return
     }
 
-    if (!newChanges || !syncBody) {
+    if (!newChanges || !syncBodyMessages) {
         throw new Error("neshto utna negde")
     }
 
@@ -230,7 +258,8 @@ export async function handleSyncResponseMessages(this: ServerHandler, message: W
         type: "syncResponseMessages",
         data: {
             syncBody: {
-                chats: Object.fromEntries(syncBody.packet.chats.map(chat => [chat.id, chat.tree])),
+                shallowChats: null,
+                chats: Object.fromEntries(syncBodyMessages.packet.chats.map(chat => [chat.id, chat.tree])),
             },
             changes: newChanges,
         }

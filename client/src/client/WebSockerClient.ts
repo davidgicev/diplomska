@@ -36,4 +36,21 @@ export default class WebSocketClient {
         }
         channel.send(JSON.stringify(data))
     }
+
+    sendChat(targetUserId: number, chat: Store.Chat) {
+        if (targetUserId === this.user.id) {
+            return
+        }
+        console.log("probuvam da pratam poraka do", targetUserId, "porakata e", chat)
+        console.log(this.dataChannels[targetUserId])
+        if (!this.dataChannels[targetUserId]) {
+            return
+        }
+        const channel = this.dataChannels[targetUserId]
+        const data: RTCMessage = {
+            type: "newChat",
+            data: chat
+        }
+        channel.send(JSON.stringify(data))
+    }
 }

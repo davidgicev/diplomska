@@ -51,7 +51,7 @@ export const actions = {
         // }
     },
 
-    setActiveChatId(this: StoreProvider, activeChatId: string) {
+    setActiveChatId(this: StoreProvider, activeChatId: string | number) {
         this.setState({ activeChatId })
     },
 
@@ -72,16 +72,16 @@ export const actions = {
         })
     },
 
-    sendMessage(this: StoreProvider, message: Store.Message) {
+    sendMessage(this: StoreProvider, message: Store.Message, userIds: number[]) {
         console.log("Store: Sending new message", message)
         this.state.actions.upsertMessage(message)
         this.client?.serverHandler.send({
             type: "upsertMessage",
             data: message
         })
-        // for (const id of chatUserIds) {
-        //     this.client?.sendMessage(id, message)
-        // }
+        for (const id of userIds) {
+            this.client?.sendMessage(id, message)
+        }
     },
 
     async syncWithServer(this: StoreProvider) {
@@ -103,6 +103,39 @@ export const actions = {
             }
         })
     },
+
+    async createNewChat(this: StoreProvider) {
+        const title = prompt("Enter name for new chat", "")
+        const userIdsString = prompt("Enter userIds for new chat separated by comma", "")
+
+        if (!title || !userIdsString) {
+            return
+        }
+
+        const userIds = userIdsString.split(",").map(s => Number(s.trim()))
+
+        const id = "temp#" + Date.now().toString()
+
+        const chat: Store.Chat = {
+            id,
+            tempId: id,
+            lastUpdated: 0,
+            photo: "",
+            title,
+            type: "group",
+            userIds,
+        }
+
+        this.state.actions.upsertChat(chat)
+        this.client?.serverHandler.send({
+            type: "upsertChat",
+            data: chat
+        })
+        for (const id of userIds) {
+            this.client?.sendChat(id, chat)
+        }        
+
+    }
 }
 
 export type Actions = typeof actions

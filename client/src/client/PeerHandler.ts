@@ -29,6 +29,7 @@ export default class ServerHandler {
 
     handlers = {
         newMessage: this.handleNewMessage.bind(this),
+        newChat: this.handleNewChat.bind(this)
     }
 
     handleNewMessage(message: RTCMessage) {
@@ -37,5 +38,13 @@ export default class ServerHandler {
         }
 
         this.context.context.state.actions.upsertMessage(message.data)
+    }
+
+    handleNewChat(message: RTCMessage) {
+        if (message.type !== "newChat") {
+            return
+        }
+
+        this.context.context.state.actions.upsertChat(message.data)
     }
 }
