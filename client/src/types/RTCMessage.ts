@@ -4,4 +4,10 @@ export type RTCMessage = {
 } | {
     type: "newChat",
     data: Store.Chat
+} | {
+    type: "typingEvent",
+    data: {
+        chatId: string | number
+        fromUserId: number
+    }
 }

@@ -1,29 +1,57 @@
 .message {
     display: flex;
     white-space: normal;
-    align-items: flex-start;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: start;
+    justify-content: start;
 }
 
 .message > div:nth-child(2) {
     max-width: 60%;
     background-color: lightgray;
-    padding-top: 0.75em;
-    padding-bottom: 0.75em;
-    padding-left: 1.25em;
-    padding-right: 1.25em;
-    margin: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 1em;
+    padding-right: 1.5em;
+    margin: 0.2em;
     margin-top: 0.4em;
     margin-bottom: 0.4em;
-    border-radius: 2em;
+    border-radius: 1.5em;
+    border-top-left-radius: 0.2em;
     box-shadow: -0.2em 0.2em 0.2em rgba(0,0,0,0.2);
 }
 
+.message > div:nth-child(1) {
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 100%;
+    background-color: lightgrey;
+    margin: 0.4em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+.message > div:nth-child(2) > div > div:nth-child(1) {
+    font-size: 0.9em;
+    margin-bottom: 0.2em;
+    font-weight: bold;
+    text-align: start;
+}
+
 .message-self {
-    align-items: flex-end;
+    flex-direction: row-reverse;
+    justify-content: end;
 }
 
 .message-self > div:nth-child(2) {
     background-color: aliceblue;
     box-shadow: 0.2em 0.2em 0.2em rgba(0,0,0,0.2);
+    border-radius: 2em;
+    border-top-right-radius: 0.5em;
+    padding-left: 1.25em;
+    padding-right: 1em;
+}
+
+.message-self > div:nth-child(2) > div > div:nth-child(1) {
+    display: none;
 }

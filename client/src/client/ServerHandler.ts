@@ -15,6 +15,10 @@ export default class ServerHandler {
         this.context = context
         console.log("alo?", this.context.user)
         this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
+        this.connectToServer()
+    }
+
+    connectToServer(delay: number = 100) {
         this.serverConnection.onopen = () => {
             console.log("otvorjeno konekcija so server")
             // this.context.setState({
@@ -29,6 +33,18 @@ export default class ServerHandler {
             const message: WSMessage = JSON.parse(data)
             this.handlers[message.type](message)
         }
+        this.serverConnection.onclose = () => {
+            console.log("connection with server closed")
+            setTimeout(() => {
+                console.log("trying to reconnect")
+                this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
+                this.connectToServer(Math.max(delay*2, 10000))
+            }, delay)
+        }
+    }
+
+    onConnectionClosed() {
+
     }
 
     handlers = {

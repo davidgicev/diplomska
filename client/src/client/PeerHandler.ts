@@ -21,7 +21,7 @@ export default class ServerHandler {
         }
 
         channel.onclose = (event) => {
-            alert("Gasam konekcija uwu "+id)
+            // alert("Gasam konekcija uwu "+id)
             delete this.context.peerConnections[id]
             delete this.context.dataChannels[id]
         }
@@ -29,7 +29,8 @@ export default class ServerHandler {
 
     handlers = {
         newMessage: this.handleNewMessage.bind(this),
-        newChat: this.handleNewChat.bind(this)
+        newChat: this.handleNewChat.bind(this),
+        typingEvent: this.handleTypingEvent.bind(this),
     }
 
     handleNewMessage(message: RTCMessage) {
@@ -38,6 +39,7 @@ export default class ServerHandler {
         }
 
         this.context.context.state.actions.upsertMessage(message.data)
+        this.context.context.state.actions.stopTyping(message.data.chatId, message.data.fromUserId)
     }
 
     handleNewChat(message: RTCMessage) {
@@ -46,5 +48,13 @@ export default class ServerHandler {
         }
 
         this.context.context.state.actions.upsertChat(message.data)
+    }
+
+    handleTypingEvent(message: RTCMessage) {
+        if (message.type !== "typingEvent") {
+            return
+        }
+        const { chatId, fromUserId } = message.data
+        this.context.context.state.actions.handleUserTypingEvent(chatId, fromUserId)
     }
 }

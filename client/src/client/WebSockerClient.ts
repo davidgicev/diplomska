@@ -53,4 +53,22 @@ export default class WebSocketClient {
         }
         channel.send(JSON.stringify(data))
     }
+
+    sendTypingEvent(targetUserId: number, chatId: string | number, userId: number) {
+        if (targetUserId === this.user.id) {
+            return
+        }
+        if (!this.dataChannels[targetUserId]) {
+            return
+        }
+        const channel = this.dataChannels[targetUserId]
+        const data: RTCMessage = {
+            type: "typingEvent",
+            data: {
+                chatId,
+                fromUserId: userId,
+            }
+        }
+        channel.send(JSON.stringify(data))
+    }
 }

@@ -1,27 +1,23 @@
 import React from "react";
 import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
+import { debounce, throttle } from "throttle-debounce";
 
 interface Props {
     chat: Store.Chat
 }
 
 export default function Input(props: Props): JSX.Element {
-    // React.useEffect(() => {
-    //     inputRef.current?.focus();
-    // }, [])
-
     const [content, setContent] = React.useState("")
 
-    const { actions: { sendMessage }} = React.useContext(StoreContext)
+    const { actions: { sendMessage, sendTypingEvent }} = React.useContext(StoreContext)
     const { data } = React.useContext(AuthContext)
 
-    //najdi nachin tajmerot da go abortnesh
-
-    // const onTyping = React.useCallback(debounce((message:string) => {
-    //         sendTypingIndicator(props.chat.id, userContext.channel)
-    //     }, 1000, true)
-    // , [props.chat.id, userContext.channel])
+    const debouncedTypingCallback = React.useMemo(() => {
+        return throttle(2000, () => {
+            sendTypingEvent(props.chat, data?.id ?? -1)
+        })
+    }, [sendTypingEvent, props.chat, data?.id])
 
     const onPress = React.useCallback((event: React.KeyboardEvent | React.MouseEvent) => {
         if (!data?.id) {
@@ -50,12 +46,14 @@ export default function Input(props: Props): JSX.Element {
             lastUpdated: 0,
         }, props.chat.userIds)
 
-    }, [sendMessage, setContent, content, props.chat, data])
+        debouncedTypingCallback.cancel({ upcomingOnly: true })
+
+    }, [sendMessage, setContent, content, props.chat, data, debouncedTypingCallback])
     
     const onChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        // onTyping(inputRef.current?.value);
+        debouncedTypingCallback()
         setContent(event.target.value)
-    }, [setContent]);
+    }, [setContent, debouncedTypingCallback]);
 
 
     return (

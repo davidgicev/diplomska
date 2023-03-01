@@ -2,6 +2,7 @@ import { updateChat } from "../handler/chat"
 import { updateMessage } from "../handler/message"
 import { updateUser } from "../handler/user"
 import { StoreProvider } from "./StoreProvider"
+import { debounce, throttle } from "throttle-debounce"
 
 export const actions = {
 
@@ -99,6 +100,72 @@ export const actions = {
                 changes: {
                     chats: [],
                     users: []
+                }
+            }
+        })
+    },
+
+    async sendTypingEvent(this: StoreProvider, chat: Store.Chat, userId: number) {
+        for (const id of chat.userIds) {
+            this.client?.sendTypingEvent(id, chat.id, userId)
+        }
+    },
+
+    async stopTyping(this: StoreProvider, chatId: string | number, userId: number) {
+        this.typingIndicators[chatId].cancel({ upcomingOnly: true })
+        this.setState(state => {
+            let chatState = state.client.chats[chatId]
+            chatState = { ...chatState, typingUserIds: { ...chatState.typingUserIds } }
+            delete chatState.typingUserIds[userId]
+            return {
+                ...state,
+                client: {
+                    ...state.client,
+                    chats: {
+                        ...state.client.chats,
+                        [chatId]: chatState
+                    }
+                }
+            }
+        })
+    },
+
+    async handleUserTypingEvent(this: StoreProvider, chatId: string | number, userId: number) {
+        if (!this.typingIndicators[chatId]) {
+            this.typingIndicators[chatId] = debounce(2000, () => {
+                console.log("gasam")
+                this.setState(state => {
+                    let chatState = state.client.chats[chatId]
+                    chatState = { ...chatState, typingUserIds: { ...chatState.typingUserIds } }
+                    delete chatState.typingUserIds[userId]
+                    return {
+                        ...state,
+                        client: {
+                            ...state.client,
+                            chats: {
+                                ...state.client.chats,
+                                [chatId]: chatState
+                            }
+                        }
+                    }
+                })})
+        }
+        else {
+            this.typingIndicators[chatId]()
+        }
+
+        console.log("palam")
+        const state = this.state
+        let chatState = state.client.chats[chatId] ?? { typingUserIds: {} }
+        chatState = { ...chatState, typingUserIds: {...chatState.typingUserIds} }
+        chatState.typingUserIds[userId] = true
+        this.setState({
+            ...state,
+            client: {
+                ...state.client,
+                chats: {
+                    ...state.client.chats,
+                    [chatId]: chatState,
                 }
             }
         })

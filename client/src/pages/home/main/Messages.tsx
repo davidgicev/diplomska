@@ -7,6 +7,7 @@ import "./Messages.css"
 
 interface Props {
     chat: Store.Chat
+    participants: Record<number, Store.User>
 }
 
 export default function Messages(props: Props): JSX.Element {
@@ -14,12 +15,8 @@ export default function Messages(props: Props): JSX.Element {
     const ref = React.useRef<HTMLDivElement>(null)
 
     const messages = useLiveQuery(async () => {
-        return await db.messages.where("chatId").equals(props.chat.id).toArray()
+        return await db.messages.where("chatId").equals(props.chat.id).sortBy("date");
     }, [props.chat.id], [])
-
-    const fromUsers = useLiveQuery(async () => {
-        return await Promise.all(messages.map(m => db.users.get(m.fromUserId)))
-    }, [messages], [])
 
     React.useEffect(() => {
         if (ref.current) {
@@ -33,15 +30,17 @@ export default function Messages(props: Props): JSX.Element {
 
     console.log(messages)
 
+    const { participants } = props
+
     return (
         <div className="h-full overflow-y-scroll" ref={ref}>
             <div className="h-32" />
             {
-                messages.map((message, index) => (
+                messages.map((message) => (
                     <MessageBubble 
                         message={message}
-                        user={fromUsers[index]}
-                        fromSelf={fromUsers[index]?.id === data.id}
+                        user={participants[message.fromUserId]}
+                        fromSelf={message.fromUserId === data.id}
                         key={message.id}
                     />
                 ))

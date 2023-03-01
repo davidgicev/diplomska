@@ -1,6 +1,7 @@
 import React from "react";
 import { StoreContext, getBindedActions } from "./store";
 import WebSocketClient from "../client/WebSockerClient";
+import { debounce } from "throttle-debounce";
 
 interface Props {
     user: AuthStore.User
@@ -9,13 +10,15 @@ interface Props {
 
 export class StoreProvider extends React.Component<Props, Store.Context> {
     client?: WebSocketClient;
+    typingIndicators: Record<string | number, debounce<() => void>> = {}
 
     constructor(props: Props) {
         super(props)
         this.state = {
             client: {
                 serverConnectionStatus: "offline",
-                users: {}
+                users: {},
+                chats: {},
             },
             chats: {},
             users: {},

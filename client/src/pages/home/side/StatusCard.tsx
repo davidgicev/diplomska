@@ -1,9 +1,11 @@
 import React from "react"
 import { AuthContext } from "../../../authStore/store"
+import { StoreContext } from "../../../store/store"
 // import { useNavigate } from "react-router-dom"
 
 export default function StatusCard(): JSX.Element {
     // const navigate = useNavigate()
+    const { actions: { syncWithServer } } = React.useContext(StoreContext)
     const { data } = React.useContext(AuthContext)
 
     // const logout = () => {
@@ -12,9 +14,14 @@ export default function StatusCard(): JSX.Element {
     //     navigate("/login")
     // }
 
+    if (!data) {
+        return <></>
+    }
+
     return (
-        <div className="text-2xl pl-5 pb-5">
-            {data?.id}
+        <div className="flex flex-row text-2xl px-5 pb-5 items-center justify-between">
+            {data.username}
+            <button onClick={() => syncWithServer() } className="bg-light-olive px-5 py-1 rounded-full text-[0.8em]" >Sync</button>
         </div>
     )
 }

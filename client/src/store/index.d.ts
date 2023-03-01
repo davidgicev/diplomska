@@ -34,12 +34,17 @@ declare namespace Store {
         connected: boolean
     }
 
+    interface ChatState {
+        typingUserIds: Record<number, true>
+    }
+
     type Actions = import("./actions").Actions
     
     interface Context {
         client: {
             serverConnectionStatus: "connected" | "offline",
             users: Record<number, UserState>
+            chats: Record<string | number, ChatState>
         }
         activeChatId?: string | number
         users: Record<string, User>
