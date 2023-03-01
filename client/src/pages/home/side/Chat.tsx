@@ -1,6 +1,8 @@
 import React from "react";
 import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "../../../database";
 
 interface Props {
     chat: Store.Chat
@@ -13,6 +15,12 @@ export default function Chat(props: Props): JSX.Element {
 
     const { data: user } = React.useContext(AuthContext)
 
+    const lastMessage: string | null = useLiveQuery(async () => {
+        return (await db.messages.where("chatId").equals(props.chat.id).sortBy("date")).pop()?.content ?? null
+    }, [], null)
+
+    console.log(lastMessage)
+
     // let showLastMessage = data.messages.length > 0 && data.status != 'typing';
 
     if (!user?.id) {
@@ -23,7 +31,7 @@ export default function Chat(props: Props): JSX.Element {
 
     const typingUsernames = typingUserIds ? Object.keys(typingUserIds).map(x => props.users[x as unknown as number].username) : []
 
-    const statusMessage = typingUsernames.length === 0 ? " " : chat.type === "private" ? "typing..." : typingUsernames.join(" and ") + ` ${typingUsernames.length > 1 ? "are" : "is"} typing...`
+    const statusMessage = typingUsernames.length === 0 ? "" : chat.type === "private" ? "typing..." : typingUsernames.join(" and ") + ` ${typingUsernames.length > 1 ? "are" : "is"} typing...`
 
     const isActive = activeChatId === chat.id
 
@@ -43,15 +51,15 @@ export default function Chat(props: Props): JSX.Element {
                 </p>
 
                 {
-                    // showLastMessage
-                    // ?
-                    // <p className="text-sm opacity-50 text-ellipsis overflow-hidden">
-                    //     {data.messages.slice(-1)[0].content}
-                    // </p>
-                    // :
+                    statusMessage
+                    ?
                     <div className="text-sm animate-pulse">
-                        {statusMessage}
+                        {statusMessage || lastMessage?.toString()}
                     </div>
+                    :
+                    <p className="text-sm opacity-50 text-ellipsis overflow-hidden">
+                        {lastMessage?.toString()}
+                    </p>
                 }
             </div>
 
