@@ -36,6 +36,7 @@ declare namespace Store {
 
     interface ChatState {
         typingUserIds: Record<number, true>
+        draft: string
     }
 
     type Actions = import("./actions").Actions
@@ -47,9 +48,9 @@ declare namespace Store {
             chats: Record<string | number, ChatState>
         }
         activeChatId?: string | number
-        users: Record<string, User>
-        chats: Record<string, Chat>
-        messages: Record<string, Message>
+        users: Record<number, User>
+        chats: Chat[]
+        messages: Record<number | string, Message[]>
         actions: { [K in keyof Actions]: OmitThisParameter<Actions[K]> }
     }
 }

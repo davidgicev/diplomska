@@ -20,7 +20,7 @@ export class StoreProvider extends React.Component<Props, Store.Context> {
                 users: {},
                 chats: {},
             },
-            chats: {},
+            chats: [],
             users: {},
             messages: {},
             actions: getBindedActions(this),

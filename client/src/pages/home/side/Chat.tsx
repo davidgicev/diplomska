@@ -1,49 +1,50 @@
 import React from "react";
 import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../../database";
+import { BsFillPeopleFill, BsFillPersonFill } from "react-icons/bs";
+import { SlNotebook } from "react-icons/sl"
 
 interface Props {
     chat: Store.Chat
-    users: Record<number, Store.User>
 }
 
 export default function Chat(props: Props): JSX.Element {
-    const { activeChatId, actions: { setActiveChatId }, client: { chats: chatStatuses } } = React.useContext(StoreContext)
     const chat = props.chat;
-
+    const { activeChatId, messages, users, actions: { setActiveChatId }, client: { chats: chatStatuses } } = React.useContext(StoreContext)
     const { data: user } = React.useContext(AuthContext)
-
-    const lastMessage: string | null = useLiveQuery(async () => {
-        return (await db.messages.where("chatId").equals(props.chat.id).sortBy("date")).pop()?.content ?? null
-    }, [], null)
-
-    console.log(lastMessage)
-
-    // let showLastMessage = data.messages.length > 0 && data.status != 'typing';
-
+    
     if (!user?.id) {
         return <></>
     }
 
+    const messagesInChat = messages[chat.id]
+    const lastMessage = messagesInChat.slice(-1).pop()?.content
+
     const typingUserIds = chatStatuses[chat.id]?.typingUserIds
 
-    const typingUsernames = typingUserIds ? Object.keys(typingUserIds).map(x => props.users[x as unknown as number].username) : []
+    const typingUsernames = typingUserIds ? Object.keys(typingUserIds).map(x => users[x as unknown as number].username) : []
 
     const statusMessage = typingUsernames.length === 0 ? "" : chat.type === "private" ? "typing..." : typingUsernames.join(" and ") + ` ${typingUsernames.length > 1 ? "are" : "is"} typing...`
 
     const isActive = activeChatId === chat.id
 
-    const title = chat.type === "group" ? chat.title : props.users[chat.userIds.find(id => id !== user.id) || user.id].username
+    const title = chat.type === "group" ? chat.title : chat.title || users[chat.userIds.find(id => id !== user.id) || user.id].username
 
     return (
         <button
-            className={`flex flex-row p-6 px-4 text-left whitespace-nowrap max-w-[100%] overflow-hidden items-center ${isActive ? 'bg-light-olive':'bg-transparent'}`} 
+            className={`flex flex-row p-6 px-4 text-left whitespace-nowrap w-full overflow-hidden items-center ${isActive ? 'bg-light-olive':'bg-transparent'}`} 
             onClick={() => setActiveChatId(chat.id)}
         >  
 
-            <div className={`w-12 h-12 bg-center bg-cover mr-5 rounded-full`} style={{ backgroundImage: `url('${chat.photo}')` }} />
+            <div className={`w-12 h-12 bg-center bg-cover mr-5 rounded-full flex items-center justify-center bg-light-olive`} style={{ backgroundImage: `url('${chat.photo}')` }}>
+                {(!chat.photo && chat.type === "group") ? (
+                    <BsFillPeopleFill size={"1.5em"} />
+                ) : chat.userIds.length > 1 ? (
+                    <BsFillPersonFill size={"1.5em"} />
+                ): (
+                    <SlNotebook size={"1.5em"} />
+                )}
+            </div>
 
             <div className="flex flex-col flex-1 overflow-hidden">
                 <p className="text-lg">

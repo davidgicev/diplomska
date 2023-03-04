@@ -1,16 +1,16 @@
 import React from "react";
 import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
-import { debounce, throttle } from "throttle-debounce";
+import { throttle } from "throttle-debounce";
+import { BiSend } from "react-icons/bi"
 
 interface Props {
     chat: Store.Chat
 }
 
 export default function Input(props: Props): JSX.Element {
-    const [content, setContent] = React.useState("")
-
     const { actions: { sendMessage, sendTypingEvent }} = React.useContext(StoreContext)
+    const [content, setContent] = React.useState("")
     const { data } = React.useContext(AuthContext)
 
     const debouncedTypingCallback = React.useMemo(() => {
@@ -57,13 +57,15 @@ export default function Input(props: Props): JSX.Element {
 
 
     return (
-        <div className="flex flex-row bg-light-cyan justify-between">
-            <input
-                value={content}
-                className="flex-1 p-2 m-2 bg-transparent outline-none"
-                onKeyDown={onPress} onChange={onChange} 
-            />
-            <button onClick={onPress} className="mx-2 mr-5 text-olive">Send</button>
+        <div className="absolute bottom-0 w-full lg:px-[5vw] xl:px-[10vw]">
+            <div className="flex flex-row bg-light-cyan mx-10 justify-between rounded-t-3xl">
+                <input
+                    value={content}
+                    className="flex-1 p-2 m-2 pl-4 bg-transparent outline-none"
+                    onKeyDown={onPress} onChange={onChange} 
+                />
+                <button onClick={onPress} className="mx-2 mr-5 text-olive"> <BiSend size={25} /> </button>
+            </div>
         </div>
     );
 }

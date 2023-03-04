@@ -24,6 +24,7 @@ export default class ServerHandler {
             // alert("Gasam konekcija uwu "+id)
             delete this.context.peerConnections[id]
             delete this.context.dataChannels[id]
+            this.context.context.state.actions.removeUserConnection(id)
         }
     }
 

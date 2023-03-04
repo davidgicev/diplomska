@@ -1,10 +1,19 @@
+import { Database, db } from "../database"
 import { updateChat } from "../handler/chat"
 import { updateMessage } from "../handler/message"
 import { updateUser } from "../handler/user"
 import { StoreProvider } from "./StoreProvider"
-import { debounce, throttle } from "throttle-debounce"
+import { debounce } from "throttle-debounce"
 
 export const actions = {
+
+    setStoreData(this: StoreProvider, users: Store.Context["users"], chats: Store.Context["chats"], messages: Store.Context["messages"]) {
+        this.setState({ users, chats, messages })
+    },
+
+    setServerConnectionStatus(this: StoreProvider, value: Store.Context["client"]["serverConnectionStatus"]) {
+        this.setState({ client: {...this.state.client, serverConnectionStatus: value }})
+    },
 
     addUserConnection(this: StoreProvider, userId: number) {
         this.setState((state) => ({
@@ -15,6 +24,36 @@ export const actions = {
                     [userId]: {
                         ...state.client.users[userId],
                         connected: true,
+                    }
+                }
+            }
+        }))
+    },
+
+    removeUserConnection(this: StoreProvider, userId: number) {
+        this.setState((state) => ({
+            client: {
+                ...state.client,
+                users: {
+                    ...state.client.users,
+                    [userId]: {
+                        ...state.client.users[userId],
+                        connected: false,
+                    }
+                }
+            }
+        }))
+    },
+
+    updateDraftForChat(this: StoreProvider, chatId: string | number, content: string) {
+        this.setState((state) => ({
+            client: {
+                ...state.client,
+                chats: {
+                    ...state.client.chats,
+                    [chatId]: {
+                        ...(state.client.chats[chatId] ?? {}),
+                        draft: content,
                     }
                 }
             }
@@ -58,12 +97,6 @@ export const actions = {
 
     upsertMessage(this: StoreProvider, message: Store.Message) {
         this.setState((state) => {
-            const newMessages = { ...state.messages }
-
-            if (message.id !== message.tempId) {
-                delete newMessages[message.tempId]
-            }
-            newMessages[message.id] = message
 
             // return {
             //     ...state,
@@ -103,6 +136,10 @@ export const actions = {
                 }
             }
         })
+    },
+
+    async deleteLocalDatabase(this: StoreProvider) {
+        await db.delete()
     },
 
     async sendTypingEvent(this: StoreProvider, chat: Store.Chat, userId: number) {

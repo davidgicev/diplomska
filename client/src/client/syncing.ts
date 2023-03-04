@@ -127,7 +127,7 @@ export async function handleSyncResponseShallow(this: ServerHandler, message: WS
             const local = await db.chats.get(chat.id)
             if (!local) {
                 const temp = await db.chats.where("tempId").equals(chat.tempId).first()
-                if (!temp) {
+                if (!temp || !chat.tempId) {
                     await db.chats.add(chat)
                     continue
                 }

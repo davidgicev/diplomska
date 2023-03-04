@@ -1,9 +1,10 @@
 .message {
     display: flex;
-    white-space: normal;
+    white-space: pre-wrap;
     flex-direction: row;
     align-items: start;
     justify-content: start;
+    word-wrap: break-word;
 }
 
 .message > div:nth-child(2) {
@@ -29,6 +30,10 @@
     margin: 0.4em;
     margin-top: 0.4em;
     margin-bottom: 0.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: dimgray;
 }
 
 .message > div:nth-child(2) > div > div:nth-child(1) {

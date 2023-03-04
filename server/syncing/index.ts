@@ -316,7 +316,7 @@ export class SyncManager {
             newChanges = await this.generateChangesMessages(utils, syncBody, incoming)
         })
     
-        if (newChanges && newChanges.messages.length === 0) {
+        if (!message.data.syncBody && newChanges && newChanges.messages.length === 0) {
             return
         }
     

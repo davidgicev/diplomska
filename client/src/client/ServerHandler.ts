@@ -21,6 +21,7 @@ export default class ServerHandler {
     connectToServer(delay: number = 100) {
         this.serverConnection.onopen = () => {
             console.log("otvorjeno konekcija so server")
+            this.context.context.state.actions.setServerConnectionStatus("connected")
             // this.context.setState({
             //     client: {
             //         serverConnectionStatus: "connected",
@@ -35,6 +36,7 @@ export default class ServerHandler {
         }
         this.serverConnection.onclose = () => {
             console.log("connection with server closed")
+            this.context.context.state.actions.setServerConnectionStatus("offline")
             setTimeout(() => {
                 console.log("trying to reconnect")
                 this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
@@ -218,6 +220,7 @@ export default class ServerHandler {
         const id = message.data.id
         delete this.context.dataChannels[id]
         delete this.context.peerConnections[id]
+        this.context.context.state.actions.removeUserConnection(id)
     }
     
     handleError(message: WSMessage) {

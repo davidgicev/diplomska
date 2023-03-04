@@ -100,17 +100,17 @@ export interface DBUtils {
 
 export async function makeShallowSyncBody(utils: DBUtils): Promise<ShallowSyncBody> {
     const users = await utils.getUsers()
-    const hashedUsers = users.map(u => sha1(u))
+    const hashedUsers = users.map((u, i) => sha1(u) + i)
     const usersObject = new MerkleTree(hashedUsers)
 
     const chats = await utils.getChats()
-    const hashedChats = chats.map(c => sha1(c))
+    const hashedChats = chats.map((c, i) => sha1(c) + i)
     const chatsObject = new MerkleTree(hashedChats)
 
     const hashedMessages = []
     for (const chat of chats) {
         const messages = await utils.getMessagesForChat(chat.id)
-        hashedMessages.push(SHA256(messages.map(m => sha1(m)).join("")))
+        hashedMessages.push(SHA256(messages.map((m) => sha1(m)).join("") + hashedMessages.length))
     }
     const messagesObject = new MerkleTree(hashedMessages)
     
@@ -133,7 +133,7 @@ export async function makeMessagesSyncBody(utils: DBUtils, chatIds: number[]): P
     for (const chatId of chatIds) {
         const chatIdAsNumber = Number(chatId)
         const messages = await utils.getMessagesForChat(chatIdAsNumber)
-        const hashedMessages = messages.map(m => sha1(m))
+        const hashedMessages = messages.map((m, i) => sha1(m) + i)
         chats[chatIdAsNumber] = new MerkleTree(hashedMessages)
     }
     
