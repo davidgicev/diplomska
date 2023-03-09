@@ -146,6 +146,7 @@ export class SyncManager {
                     await db("chats").where({ tempId: modified.tempId }).delete()
                     const id = await db("chats").insert(modified)
                     await Promise.all(userIds.map(userId => db("usersChats").insert({ userId, chatId: id})))
+                    await db("messages").where({ chatId: modified.tempId }).update({ chatId: id })
                     continue
                 }
                 const chatIdAsNumber = Number(chat.id)

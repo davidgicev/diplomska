@@ -9,6 +9,7 @@ export default class ServerHandler {
     constructor(context: WebSocketClient, channel: RTCDataChannel, id: number) {
         this.context = context
         this.channel = channel
+        console.log("Alo?")
 
         channel.onopen = () => {
             console.log("Opened channel")

@@ -21,12 +21,8 @@ export default class ServerHandler {
     connectToServer(delay: number = 100) {
         this.serverConnection.onopen = () => {
             console.log("otvorjeno konekcija so server")
+            delay = 100
             this.context.context.state.actions.setServerConnectionStatus("connected")
-            // this.context.setState({
-            //     client: {
-            //         serverConnectionStatus: "connected",
-            //     }
-            // })
             this.login()
         }
         this.serverConnection.onmessage = ({data}) => {
@@ -37,11 +33,12 @@ export default class ServerHandler {
         this.serverConnection.onclose = () => {
             console.log("connection with server closed")
             this.context.context.state.actions.setServerConnectionStatus("offline")
-            setTimeout(() => {
-                console.log("trying to reconnect")
-                this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
-                this.connectToServer(Math.max(delay*2, 10000))
-            }, delay)
+
+            // setTimeout(() => {
+            //     this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
+            //     this.connectToServer(Math.min(delay*2, 2000))
+            //     console.log("trying to reconnect")
+            // }, delay)
         }
     }
 
@@ -85,7 +82,7 @@ export default class ServerHandler {
         }
     
         if (!message.data.success) {
-            alert("Nesho utna hihi");
+            // setTimeout(() => this.login(), 1000)
             return 
         }
 

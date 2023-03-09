@@ -13,7 +13,7 @@ export default function Messages(props: Props): JSX.Element {
     const { data } = React.useContext(AuthContext)
     const ref = React.useRef<HTMLDivElement>(null)
 
-    const { messages: messagesRecord, users } = React.useContext(StoreContext)
+    const { messages: messagesRecord, users, actions: { sendMessage } } = React.useContext(StoreContext)
 
     const messages = messagesRecord[props.chat.id]
 
@@ -24,8 +24,21 @@ export default function Messages(props: Props): JSX.Element {
     }, [props.chat.id])
 
     React.useEffect(() => {
-        animateScroll.scrollToBottom({ containerId: "messagesWindow", duration: 200 })
+        if (!ref.current) return;
+        
+        const { scrollHeight, scrollTop, clientHeight } = ref.current
+        if (Math.abs(scrollTop + clientHeight - scrollHeight) < 200) {
+            animateScroll.scrollToBottom({ containerId: "messagesWindow", duration: 200, ignoreCancelEvents: true })
+        }
     }, [messages])
+
+    const deleteMessage = (message: Store.Message) => {
+        sendMessage({
+            ...message,
+            deleted: 1,
+            lastUpdated: message.lastUpdated + 1,
+        }, props.chat.userIds)
+    }
 
     if (!data) {
         return <></>
@@ -40,6 +53,7 @@ export default function Messages(props: Props): JSX.Element {
                         user={users[message.fromUserId]}
                         fromSelf={message.fromUserId === data.id}
                         key={message.id}
+                        deleteMessage={deleteMessage}
                     />
                 ))
             }

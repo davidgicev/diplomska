@@ -29,6 +29,7 @@ export async function updateMessage(server: Server, message: Message) {
                 id: newId !== undefined ? newId : id,
                 tempId,
                 chatId,
+                lastUpdated: message.lastUpdated + 1,
             }
         })
 

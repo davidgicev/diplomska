@@ -17,6 +17,7 @@ declare namespace Store {
         date: number
         content: string
         lastUpdated: number
+        deleted: 0 | 1
     }
 
     type Chat = {

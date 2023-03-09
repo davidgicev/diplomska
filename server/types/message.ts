@@ -6,4 +6,6 @@ export default class Message {
     content: string
     fromUserId: number
     date: number
+    lastUpdated: number
+    deleted: 0 | 1
 }

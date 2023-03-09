@@ -26,7 +26,7 @@ export default function Chat(props: Props): JSX.Element {
 
     const statusMessage = typingUsernames.length === 0 ? "" : chat.type === "private" ? "typing..." : typingUsernames.join(" and ") + ` ${typingUsernames.length > 1 ? "are" : "is"} typing...`
 
-    const isActive = activeChatId === chat.id
+    const isActive = activeChatId === chat.id || activeChatId === chat.tempId
 
     const title = chat.type === "group" ? chat.title : chat.title || users[chat.userIds.find(id => id !== user.id) || user.id].username
 

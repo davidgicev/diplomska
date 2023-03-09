@@ -8,7 +8,7 @@ import { AuthContext } from "../../../authStore/store";
 export default function Layout(): JSX.Element {
     const { activeChatId, chats, users } = React.useContext(StoreContext)
     const { data } = React.useContext(AuthContext)
-    const chat = chats.find(c => c.id === activeChatId)
+    const chat = chats.find(c => c.id === activeChatId) || chats.find(c => c.tempId === activeChatId)
 
     if (!chat || !data?.id)
         return <UnselectedChatPanel />;

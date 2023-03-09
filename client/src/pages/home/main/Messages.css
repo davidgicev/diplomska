@@ -2,12 +2,15 @@
     display: flex;
     white-space: pre-wrap;
     flex-direction: row;
-    align-items: start;
-    justify-content: start;
+    align-items: flex-start;
+    justify-content: flex-start;
     word-wrap: break-word;
+    overflow: hidden;
+    z-index: 0;
 }
 
 .message > div:nth-child(2) {
+    z-index: 2;
     max-width: 60%;
     background-color: lightgray;
     padding-top: 0.5em;
@@ -20,6 +23,25 @@
     border-radius: 1.5em;
     border-top-left-radius: 0.2em;
     box-shadow: -0.2em 0.2em 0.2em rgba(0,0,0,0.2);
+}
+
+.message > div:nth-child(3) {
+    opacity: 0;
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    color: #3c3e3c;
+    transform: translateX(100%);
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+.message:hover > div:nth-child(3) {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.message > div:nth-child(3) > button {
+    margin-right: 1em;
 }
 
 .message > div:nth-child(1) {

@@ -60,6 +60,8 @@ export type WSMessage = {
         fromUserId: number
         content: string
         date: number
+        lastUpdated: number
+        deleted: 0 | 1
     }
 } | {
     type: "userLeft",

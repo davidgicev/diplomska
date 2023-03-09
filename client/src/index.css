@@ -15,3 +15,9 @@
 .custom-scroll {
     overflow-y: overlay;
 }
+
+.separator {
+    width: 100%;
+    border-top: lightgray 3px;
+    border-style: dashed;
+}

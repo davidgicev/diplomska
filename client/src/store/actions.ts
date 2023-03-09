@@ -1,4 +1,4 @@
-import { Database, db } from "../database"
+import { db } from "../database"
 import { updateChat } from "../handler/chat"
 import { updateMessage } from "../handler/message"
 import { updateUser } from "../handler/user"
@@ -170,7 +170,6 @@ export const actions = {
     async handleUserTypingEvent(this: StoreProvider, chatId: string | number, userId: number) {
         if (!this.typingIndicators[chatId]) {
             this.typingIndicators[chatId] = debounce(2000, () => {
-                console.log("gasam")
                 this.setState(state => {
                     let chatState = state.client.chats[chatId]
                     chatState = { ...chatState, typingUserIds: { ...chatState.typingUserIds } }
@@ -191,7 +190,6 @@ export const actions = {
             this.typingIndicators[chatId]()
         }
 
-        console.log("palam")
         const state = this.state
         let chatState = state.client.chats[chatId] ?? { typingUserIds: {} }
         chatState = { ...chatState, typingUserIds: {...chatState.typingUserIds} }
@@ -208,16 +206,7 @@ export const actions = {
         })
     },
 
-    async createNewChat(this: StoreProvider) {
-        const title = prompt("Enter name for new chat", "")
-        const userIdsString = prompt("Enter userIds for new chat separated by comma", "")
-
-        if (!title || !userIdsString) {
-            return
-        }
-
-        const userIds = userIdsString.split(",").map(s => Number(s.trim()))
-
+    async createNewChat(this: StoreProvider, title: string, userIds: number[]) {
         const id = "temp#" + Date.now().toString()
 
         const chat: Store.Chat = {
@@ -237,8 +226,8 @@ export const actions = {
         })
         for (const id of userIds) {
             this.client?.sendChat(id, chat)
-        }        
-
+        }
+        this.state.actions.setActiveChatId(chat.id)
     }
 }
 

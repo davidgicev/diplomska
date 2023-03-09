@@ -53,7 +53,8 @@ export default class WebSocketServer {
    
                   const userId = body.data.id
 
-                  if(this.users[userId]) { 
+                  if(this.users[userId]) {
+                     delete this.users[userId] 
                      this.sendTo(connection, { 
                         type: "loginResponse", 
                         data: {
@@ -184,6 +185,8 @@ export default class WebSocketServer {
    }
    
    sendTo(connection: WebSocket.WebSocket, message: WSMessage) {
-      connection.send(JSON.stringify(message))
+      try {
+         connection.send(JSON.stringify(message))
+      } catch(e) {}
    }
 }

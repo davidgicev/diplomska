@@ -75,6 +75,7 @@ export class DBContext {
                     table.string('content')
                     table.string('tempChatId')
                     table.integer('lastUpdated')
+                    table.boolean('deleted')
                     table.integer('date').unsigned()
                     table.integer('chatId').unsigned()
                     table.integer('fromUserId').unsigned()
