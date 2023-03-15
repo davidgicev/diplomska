@@ -14,7 +14,7 @@ export default class ServerHandler {
     constructor(context: WebSocketClient) {
         this.context = context
         console.log("alo?", this.context.user)
-        this.serverConnection = new WebSocket(`ws://${window.location.hostname}:9000/` + this.context.user.id)
+        this.serverConnection = new WebSocket(`wss://${window.location.hostname}:9000/` + this.context.user.id)
         this.connectToServer()
     }
 
