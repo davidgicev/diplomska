@@ -1,5 +1,5 @@
 import MerkleTree from "merkletreejs"
-import Server from "../Server"
+import Server from "../server"
 import SHA256 from "crypto-js/sha256"
 import { updateUser } from "server/database/user"
 import { WSMessage } from "server/types/WSMessage"

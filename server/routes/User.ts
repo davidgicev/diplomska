@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import User from "../types/user"
-import Server from "../Server"
+import Server from "../server"
 import { initializeUser } from "../handlers/user"
 
 export function addUserRoute(server: Server) {

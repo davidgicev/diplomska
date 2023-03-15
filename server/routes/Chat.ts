@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import Server from "server/Server"
+import Server from "server/server"
 import Chat from "../types/chat"
 import { updateChat } from "../handlers/chat"
 

@@ -3,7 +3,7 @@ import { WSMessage } from "./types/WSMessage"
 import { updateChat } from "./handlers/chat";
 import { updateMessage } from "./handlers/message";
 import { updateUser, userLoggedIn } from "./handlers/user";
-import Server from "./Server";
+import Server from "./server";
 import { SyncManager } from "./syncing";
 
 export default class WebSocketServer {

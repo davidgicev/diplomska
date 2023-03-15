@@ -1,5 +1,5 @@
 import Message from "../types/message"
-import Server from "../Server"
+import Server from "../server"
 
 export async function updateMessage(server: Server, message: Message) {
     const {

@@ -1,5 +1,5 @@
 import User from "server/types/user"
-import Server from "../Server"
+import Server from "../server"
 import { updateChat } from "./chat"
 import Chat from "server/types/chat"
 

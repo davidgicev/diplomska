@@ -1,5 +1,5 @@
 import Chat from "../types/chat"
-import Server from "../Server"
+import Server from "../server"
 
 export async function updateChat(server: Server, chat: Chat) {
     const {
