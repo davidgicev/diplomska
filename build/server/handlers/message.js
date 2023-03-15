@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateMessage = void 0;
 function updateMessage(server, message) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { id, chatId, } = message;
-        const tempId = id.startsWith("temp") ? id : undefined;
-        const newId = yield server.db.updateMessage(message);
+        const { id, chatId, tempId, } = message;
+        let newId = id;
+        if (id === tempId) {
+            newId = yield server.db.updateMessage(message);
+        }
         const userIds = (yield server.db.db("usersChats").where({ chatId }).select('userId')).map(r => r.userId);
         const connections = server.ws.users;
         for (const userId of userIds) {
@@ -24,7 +26,8 @@ function updateMessage(server, message) {
             const connection = connections[userId];
             server.ws.sendTo(connection, {
                 type: "upsertMessage",
-                data: Object.assign(Object.assign({}, message), { id: (newId !== undefined ? newId : id).toString(), tempId })
+                data: Object.assign(Object.assign({}, message), { id: newId !== undefined ? newId : id, tempId,
+                    chatId, lastUpdated: message.lastUpdated + 1 })
             });
         }
     });

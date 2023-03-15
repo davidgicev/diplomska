@@ -12,13 +12,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUsers = exports.updateUser = void 0;
 function updateUser(user) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield this.db("users").update(Object.assign({}, user))[0];
+        return yield this.db.transaction((t) => __awaiter(this, void 0, void 0, function* () {
+            const [existingUser] = yield t("users").where({ username: user.username }).select("*");
+            if (existingUser !== undefined) {
+                yield t("users").where({ id: existingUser.id }).update(Object.assign(Object.assign({}, user), { id: existingUser.id, lastUpdated: existingUser.lastUpdated + 1 }));
+                return existingUser.id;
+            }
+            const userToInsert = Object.assign({}, user);
+            delete userToInsert.id;
+            const [result] = yield t("users").insert(userToInsert);
+            return result;
+        }));
     });
 }
 exports.updateUser = updateUser;
 function getUsers() {
     return __awaiter(this, void 0, void 0, function* () {
-        return Object.values(this.fakeDB.users);
+        return yield this.db("users").select("*");
     });
 }
 exports.getUsers = getUsers;

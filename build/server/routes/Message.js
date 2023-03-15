@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addMessageRoute = void 0;
 function addMessageRoute(server) {
     server.app.post("/api/newMessage", (req, res) => {
-        const { id, chatId, content, date, fromUserId, tempId, tempChatId } = req.body;
-        server.db.updateMessage({ chatId, id, content, date, fromUserId, tempId, tempChatId });
+        const { id, chatId, content, date, fromUserId, tempId, tempChatId, deleted, lastUpdated, } = req.body;
+        server.db.updateMessage({ chatId, id, content, date, fromUserId, tempId, tempChatId, deleted, lastUpdated });
         res.sendStatus(200);
     });
     server.app.get("/api/messages", (req, res) => __awaiter(this, void 0, void 0, function* () {

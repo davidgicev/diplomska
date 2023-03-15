@@ -3,11 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = require("ws");
 const message_1 = require("./handlers/message");
 const user_1 = require("./handlers/user");
+const syncing_1 = require("./syncing");
 class WebSocketServer {
     constructor(context) {
         this.context = context;
         const server = new ws_1.WebSocketServer({ port: 9000 });
         this.server = server;
+        this.syncer = new syncing_1.SyncManager(this);
         this.users = {};
         server.on('connection', (connection, request) => {
             console.log("User connected", request.url);
@@ -38,6 +40,7 @@ class WebSocketServer {
                         console.log("User logged", body.data.id);
                         const userId = body.data.id;
                         if (this.users[userId]) {
+                            delete this.users[userId];
                             this.sendTo(connection, {
                                 type: "loginResponse",
                                 data: {
@@ -51,15 +54,13 @@ class WebSocketServer {
                                 data: {
                                     success: true,
                                     userIds: Object.keys(this.users).map(k => Number(k)),
-                                    username: body.data.username
                                 }
                             });
                             this.users[userId] = connection;
                             console.log(body.data);
-                            (0, user_1.updateUser)(this.context, {
-                                id: userId,
-                                username: body.data.username,
-                            });
+                            (0, user_1.userLoggedIn)(this.context, body.data.id);
+                            // tuka naprai sync yes yes
+                            // console.log(this.context.syncer.makeSyncMessage(body.data.id))
                         }
                         break;
                     }
@@ -110,6 +111,14 @@ class WebSocketServer {
                         (0, message_1.updateMessage)(this.context, message);
                         break;
                     }
+                    case "syncResponseShallow": {
+                        this.syncer.handleSyncResponseShallow(body, userId);
+                        break;
+                    }
+                    case "syncResponseMessages": {
+                        this.syncer.handleSyncResponseMessages(body, userId);
+                        break;
+                    }
                     default:
                         this.sendTo(connection, {
                             type: "error",
@@ -138,7 +147,10 @@ class WebSocketServer {
         });
     }
     sendTo(connection, message) {
-        connection.send(JSON.stringify(message));
+        try {
+            connection.send(JSON.stringify(message));
+        }
+        catch (e) { }
     }
 }
 exports.default = WebSocketServer;

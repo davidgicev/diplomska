@@ -40,40 +40,18 @@ const knex_1 = require("knex");
 exports.DBSOURCE = "db.sqlite";
 class DBContext {
     constructor() {
-        this.fakeDB = {
-            messages: {},
-            users: {},
-            chats: {},
-        };
-        this.updateMessage = messageDB.updateMessage.bind(this);
-        this.getMessages = messageDB.getMessages.bind(this);
+        this.initializeDatabase();
         this.updateUser = userDB.updateUser.bind(this);
         this.getUsers = userDB.getUsers.bind(this);
+        this.updateMessage = messageDB.updateMessage.bind(this);
+        this.getMessages = messageDB.getMessages.bind(this);
+        this.getMessagesForChat = messageDB.getMessagesForChat.bind(this);
         this.updateChat = chatDB.updateChat.bind(this);
         this.getChats = chatDB.getChats.bind(this);
-        this.initializeDatabase();
+        this.getChatsForUser = chatDB.getChatsForUser.bind(this);
     }
     initializeDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
-            // this.db = await open({filename: DBSOURCE, driver: sqlite3.Database})
-            // console.log('Connected to the SQLite database.')
-            // await this.db.exec(`PRAGMA foreign_keys = 1`)
-            // await this.db.run(`
-            //     CREATE TABLE IF NOT EXISTS user (
-            //         id INTEGER PRIMARY KEY AUTOINCREMENT,
-            //         name text
-            //     );
-            // `);
-            // await this.db.run(`
-            //     CREATE TABLE IF NOT EXISTS message (
-            //         id INTEGER PRIMARY KEY AUTOINCREMENT,
-            //         from_user INTEGER,
-            //         to_user   INTEGER,
-            //         content      text,
-            //         FOREIGN KEY (from_user) REFERENCES user (id),
-            //         FOREIGN KEY (to_user)   REFERENCES user (id)
-            //     );   
-            // `);
             const db = (0, knex_1.knex)({
                 client: "sqlite3",
                 connection: {
@@ -82,33 +60,40 @@ class DBContext {
             });
             try {
                 yield db.transaction((t) => __awaiter(this, void 0, void 0, function* () {
-                    yield t.schema.dropTableIfExists("users");
-                    yield t.schema.dropTableIfExists("chats");
-                    yield t.schema.dropTableIfExists("messages");
-                    yield t.schema.dropTableIfExists("usersChats");
-                    yield t.schema.createTable('users', table => {
+                    // await t.schema.dropTableIfExists("users")
+                    // await t.schema.dropTableIfExists("chats")
+                    // await t.schema.dropTableIfExists("messages")
+                    // await t.schema.dropTableIfExists("usersChats")
+                    yield t.schema.createTableIfNotExists('users', table => {
                         table.increments('id');
                         table.string('username');
+                        table.string('firstName');
+                        table.string('lastName');
+                        table.string('photo');
+                        table.integer('lastUpdated');
                     });
-                    yield t.schema.createTable('chats', table => {
+                    yield t.schema.createTableIfNotExists('chats', table => {
                         table.increments('id');
                         table.string('tempId');
                         table.string('title');
                         table.string('photo');
                         table.string('type');
+                        table.integer('lastUpdated');
                     });
-                    yield t.schema.createTable('messages', table => {
+                    yield t.schema.createTableIfNotExists('messages', table => {
                         table.increments('id');
                         table.string('tempId');
                         table.string('content');
                         table.string('tempChatId');
+                        table.integer('lastUpdated');
+                        table.boolean('deleted');
                         table.integer('date').unsigned();
                         table.integer('chatId').unsigned();
                         table.integer('fromUserId').unsigned();
                         table.foreign('fromUserId').references('id').inTable('users');
                         table.foreign('chatId').references('id').inTable('chats');
                     });
-                    yield t.schema.createTable("usersChats", table => {
+                    yield t.schema.createTableIfNotExists("usersChats", table => {
                         table.integer('userId').unsigned();
                         table.integer('chatId').unsigned();
                         table.foreign('userId').references('id').inTable('users');

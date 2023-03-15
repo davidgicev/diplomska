@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMessages = exports.updateMessage = void 0;
+exports.getMessagesForChat = exports.getMessages = exports.updateMessage = void 0;
 function updateMessage(message) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield this.db.transaction((t) => __awaiter(this, void 0, void 0, function* () {
             let newId;
-            if (message.id.startsWith("temp")) {
+            if (message.id === message.tempId) {
                 const messageWithoutId = Object.assign({}, message);
                 delete messageWithoutId.id;
                 [newId] = yield t("messages").insert(messageWithoutId);
@@ -22,14 +22,20 @@ function updateMessage(message) {
             else {
                 yield t("messages").update(Object.assign({}, message));
             }
-            return newId === null || newId === void 0 ? void 0 : newId.toString();
+            return newId;
         }));
     });
 }
 exports.updateMessage = updateMessage;
 function getMessages() {
     return __awaiter(this, void 0, void 0, function* () {
-        return [];
+        return this.db("messages").select("*");
     });
 }
 exports.getMessages = getMessages;
+function getMessagesForChat(chatId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return this.db("messages").select("*").where({ chatId });
+    });
+}
+exports.getMessagesForChat = getMessagesForChat;

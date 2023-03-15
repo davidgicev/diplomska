@@ -10,14 +10,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUserRoute = void 0;
+const user_1 = require("../handlers/user");
 function addUserRoute(server) {
-    server.app.post("/api/newUser", (req, res) => {
-        const { username, id } = req.body;
-        server.db.updateUser({ username, id });
-        res.sendStatus(200);
-        // res.send(req)
-    });
+    server.app.post("/api/registerUser", (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const user = req.body;
+        const generatedId = yield (0, user_1.initializeUser)(server, user);
+        res.send({
+            id: generatedId,
+            token: generatedId,
+        });
+    }));
     server.app.get("/api/users", (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const data = yield server.db.getUsers();
+        res.send(data);
+    }));
+    server.app.put("/api/users/sync", (req, res) => __awaiter(this, void 0, void 0, function* () {
         const data = yield server.db.getUsers();
         res.send(data);
     }));

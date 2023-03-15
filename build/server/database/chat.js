@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChats = exports.updateChat = void 0;
+exports.getChatsForUser = exports.getChats = exports.updateChat = void 0;
 function updateChat(chat) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield this.db.transaction((t) => __awaiter(this, void 0, void 0, function* () {
             let newId;
-            if (chat.id.startsWith("temp") || chat.id === "") {
+            if (chat.id !== chat.tempId) {
                 [newId] = yield t("chats").insert({
                     tempId: chat.tempId,
                     title: chat.title,
@@ -42,14 +42,20 @@ function updateChat(chat) {
                 //     })
                 // }
             }
-            return newId === null || newId === void 0 ? void 0 : newId.toString();
+            return newId;
         }));
     });
 }
 exports.updateChat = updateChat;
 function getChats() {
     return __awaiter(this, void 0, void 0, function* () {
-        return Object.values(this.fakeDB.chats);
+        return yield this.db("chats").select("*");
     });
 }
 exports.getChats = getChats;
+function getChatsForUser(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield this.db("chats").select("*").where({ id: userId });
+    });
+}
+exports.getChatsForUser = getChatsForUser;
