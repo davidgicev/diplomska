@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cd client && npm run build && cd../ && ts-node index.ts",
-    "build": "npx tsc"
+    "build": "cd client && npm run build && cd../ && tsc "
   },
   "author": "",
   "license": "ISC",
