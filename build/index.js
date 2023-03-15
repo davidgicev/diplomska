@@ -8,6 +8,7 @@ const server_1 = __importDefault(require("./server/server"));
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const port = 8080;
-exports.APP_URL = process.env.CYCLIC_URL;
+exports.APP_URL = process.env.APP_URL;
+console.log("APP URL IS ", exports.APP_URL);
 const server = new server_1.default(app);
 server.start(port);
