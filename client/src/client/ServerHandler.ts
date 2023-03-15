@@ -1,3 +1,4 @@
+import { APP_URL } from "..";
 import { WSMessage } from "../types/WSMessage";
 import PeerHandler from "./PeerHandler";
 import WebSocketClient from "./WebSockerClient";
@@ -14,7 +15,7 @@ export default class ServerHandler {
     constructor(context: WebSocketClient) {
         this.context = context
         console.log("alo?", this.context.user)
-        this.serverConnection = new WebSocket("ws://localhost:9000/" + this.context.user.id)
+        this.serverConnection = new WebSocket(`ws://${APP_URL}:9000/` + this.context.user.id)
         this.connectToServer()
     }
 
