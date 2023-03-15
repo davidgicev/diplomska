@@ -17,8 +17,8 @@ export default function LoginScreen(): JSX.Element {
         const result = await registerUser({
             id: -1,
             username,
-            firstName: "prvo ime " + username,
-            lastName: "vtoro ime " + username,
+            firstName: username,
+            lastName: "",
             lastUpdated: 0,
             photo: ""
         })

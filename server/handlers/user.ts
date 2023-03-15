@@ -17,7 +17,7 @@ export async function userLoggedIn(server: Server, userId: number) {
 }
 
 export async function initializeUser(server: Server, user: User) {
-    const newUserId = (await server.db.updateUser(user)) ?? user.id
+    const newUserId = (await server.db.updateUser(user))
 
     await server.db.db.transaction(async (db) => {
         {

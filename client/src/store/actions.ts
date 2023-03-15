@@ -206,14 +206,14 @@ export const actions = {
         })
     },
 
-    async createNewChat(this: StoreProvider, title: string, userIds: number[]) {
+    async createNewChat(this: StoreProvider, title: string, photo: string,  userIds: number[]) {
         const id = "temp#" + Date.now().toString()
 
         const chat: Store.Chat = {
             id,
             tempId: id,
             lastUpdated: 0,
-            photo: "",
+            photo,
             title,
             type: "group",
             userIds,

@@ -5,17 +5,15 @@ import { BsFillPersonFill } from "react-icons/bs"
 import { MdOutlineLogout } from "react-icons/md"
 import { GoSync } from "react-icons/go"
 import { saveUser } from "../../../api/localStorage/auth"
-import { useNavigate } from "react-router-dom"
 
 export default function StatusCard(): JSX.Element {
-    const navigate = useNavigate()
-    const { users, client: { serverConnectionStatus }, actions: { syncWithServer, deleteLocalDatabase } } = React.useContext(StoreContext)
+    const { users, client: { serverConnectionStatus }, actions: { syncWithServer } } = React.useContext(StoreContext)
     const { data, setUserData } = React.useContext(AuthContext)
 
     const logout = () => {
         setUserData()
         saveUser()
-        navigate("/login")
+        window.location.href = "/login"
     }
 
     if (!data) {

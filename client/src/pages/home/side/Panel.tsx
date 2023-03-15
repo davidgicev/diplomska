@@ -17,7 +17,7 @@ export default function Panel() {
                 className={"mx-auto mt-10 bg-mint-cream"}
                 style={{ content: { width: "50vw", borderRadius: "1em", border: "none" }, overlay: { backgroundColor: "rgba(0,0,0,0.4)", zIndex: 10 } }}
             >
-                <ChatPopup />
+                <ChatPopup close={() => setIsModalOpen(false)} />
             </Modal>
             <div className="text-xl text-center bg-nickel py-4 h-20 flex items-center">
                 <button 

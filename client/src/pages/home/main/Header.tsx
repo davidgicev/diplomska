@@ -19,14 +19,17 @@ export default function Header(props: Props): JSX.Element {
 
     const countOnline = chat.userIds.map(id => userStatuses[id]?.connected).reduce((sum, curr) => sum + Number(!!curr), 1)
 
-    const countOnlineMessage = chat.type === "group" ? countOnline + " online" : countOnline === 1 ? "offline" : "online"
+    const countOnlineMessage = chat.type === "group" ? countOnline + " online" : chat.userIds.length === 1 ? "store notes here" : countOnline === 1 ? "offline" : "online"
 
     const statusMessage = typingStatusMessage || countOnlineMessage || ""
 
     return (
         <div className="z-10 flex flex-row items-center py-4 px-2 absolute top-0 w-[100%] backdrop-blur shadow-sm pl-6" style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
             <div className={`w-12 h-12 bg-center bg-cover ml-8 mr-2 rounded-full flex items-center justify-center bg-light-olive text-white`} style={{ backgroundImage: `url('${chat.photo}')` }}>
-                {(!chat.photo && chat.type === "group") ? (
+                {chat.photo && (
+                    <div className="w-full h-full bg-cover bg-center rounded-full" style={{ backgroundImage: `url('${chat.photo}')` }} />
+                )}
+                {chat.photo ? "" : chat.type === "group" ? (
                     <BsFillPeopleFill size={"1.5em"} />
                 ) : chat.userIds.length > 1 ? (
                     <BsFillPersonFill size={"1.5em"} />

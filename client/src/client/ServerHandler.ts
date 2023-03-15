@@ -244,6 +244,7 @@ export default class ServerHandler {
         const peer = new RTCPeerConnection(configuration)
     
         peer.onicecandidate = (event) => { 
+            // dodadi dopolnitelno prakjanje direktno do peersot
             if (event.candidate) { 
                 this.send({ 
                     type: "candidate", 
@@ -255,8 +256,11 @@ export default class ServerHandler {
             } 
         };
 
+        
+
         peer.oniceconnectionstatechange = (event) => {
             // alert(peer.iceConnectionState)
+            // vrati ova da ima detekcija
         }
     
         this.context.peerConnections[id] = peer

@@ -17,6 +17,7 @@ export default function Layout(): JSX.Element {
 
     if (chat.type === "private") {
         modified.title = modified.title || Object.values(users).find(x => x.id !== data.id)?.username || ""
+        modified.photo = modified.type === "group" ? chat.photo : chat.userIds.length === 1 ? "" : users[chat.userIds.find(id => id !== data.id) || data.id]?.photo || ""
     }
 
     return (

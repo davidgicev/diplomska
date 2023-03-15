@@ -1,5 +1,5 @@
 import React from "react";
-import Select, { MultiValue, SelectInstance } from "react-select";
+import Select, { SelectInstance } from "react-select";
 import { StoreContext } from "../../../store/store";
 import { AuthContext } from "../../../authStore/store";
 
@@ -8,8 +8,13 @@ interface Option {
     label: string
 }
 
-export default function ChatPopup(): JSX.Element {
+interface Props {
+    close: () => void
+}
+
+export default function ChatPopup(props: Props): JSX.Element {
     const [ title, setTitle ] = React.useState("")
+    const [ photo, setPhoto ] = React.useState("")
     const picker = React.useRef<SelectInstance<Option>>(null)
     const { data } = React.useContext(AuthContext)
     const { users, actions: { createNewChat } } = React.useContext(StoreContext)
@@ -23,7 +28,8 @@ export default function ChatPopup(): JSX.Element {
     const submit = () => {
         const members = picker.current?.getValue().map(x => x.value) || []
         members.push(data.id)
-        createNewChat(title, members)
+        createNewChat(title, photo, members)
+        props.close()
     }
     
     return (
@@ -33,6 +39,9 @@ export default function ChatPopup(): JSX.Element {
             
             <div className="text-xl mb-2 ml-4">Title</div>
             <input className="mb-5 rounded-xl outline-opal bg-light-cyan px-4 py-3" value={title} onChange={(ev) => setTitle(ev.target.value)} />
+
+            <div className="text-xl mb-2 ml-4">Photo</div>
+            <input className="mb-5 rounded-xl outline-opal bg-light-cyan px-4 py-3" value={photo} onChange={(ev) => setPhoto(ev.target.value)} />
 
             <div className="text-xl mb-2 ml-4">Members</div>
             <div className="text-lg">

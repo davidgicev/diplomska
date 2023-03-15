@@ -40,6 +40,18 @@ export default function Messages(props: Props): JSX.Element {
         }, props.chat.userIds)
     }
 
+    const editMessage = (message: Store.Message) => {
+        const newContent = prompt("Enter new message content", message.content)
+        if (!newContent?.trim()) {
+            return
+        }
+        sendMessage({
+            ...message,
+            content: newContent,
+            lastUpdated: message.lastUpdated + 1,
+        }, props.chat.userIds)
+    }
+
     if (!data) {
         return <></>
     }
@@ -54,6 +66,7 @@ export default function Messages(props: Props): JSX.Element {
                         fromSelf={message.fromUserId === data.id}
                         key={message.id}
                         deleteMessage={deleteMessage}
+                        editMessage={editMessage}
                     />
                 ))
             }

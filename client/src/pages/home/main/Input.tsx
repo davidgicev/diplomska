@@ -34,7 +34,7 @@ export default function Input(props: Props): JSX.Element {
 
         setContent("")
 
-        const id = "temp#" + Date.now().toString()
+        const id = "temp#" + data.id + Date.now().toString()
 
         sendMessage({
             id: id,
