@@ -10,9 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/express": "^4.17.17",
-    "@types/object-hash": "^3.0.2",
-    "@types/webrtc": "^0.0.33",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
@@ -27,6 +24,9 @@
     "ws": "^8.12.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/object-hash": "^3.0.2",
+    "@types/webrtc": "^0.0.33",
     "@types/cors": "^2.8.13",
     "@types/crypto-js": "^4.1.1",
     "@types/node": "^18.14.0",
