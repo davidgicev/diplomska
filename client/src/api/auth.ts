@@ -7,7 +7,7 @@ export interface RegisterResponse {
 
 export async function registerUser(user: Store.User): Promise<RegisterResponse | undefined> {
     try {
-        const result = await fetch(APP_URL + "/registerUser", {
+        const result = await fetch(APP_URL + "/api/registerUser", {
                 method: "POST",
                 headers: {
                 'Accept': 'application/json',

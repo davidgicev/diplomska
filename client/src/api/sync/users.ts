@@ -2,7 +2,7 @@ import { APP_URL } from "../..";
 
 export async function syncUsers(): Promise<Store.User[]> {
     try {
-        const result = await fetch(APP_URL + "/users/sync", {
+        const result = await fetch(APP_URL + "/api/users/sync", {
                 method: "PUT",
                 headers: {
                 'Accept': 'application/json',
