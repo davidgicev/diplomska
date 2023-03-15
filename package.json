@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && cd client && npm install && npm run build && cd../ && ts-node index.ts",
-    "build": "npm install && cd client && npm install && npm run build && cd../ && tsc "
+    "start": "npm install && cd client && npm install && npm run build && cd ../ && ts-node index.ts",
+    "build": "npm install && cd client && npm install && npm run build && cd ../ && tsc "
   },
   "author": "",
   "license": "ISC",
