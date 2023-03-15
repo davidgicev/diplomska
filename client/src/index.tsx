@@ -5,6 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Modal from "react-modal"
 
+export const APP_URL = process.env.CYCLIC_URL
+console.log("Url in react is ", APP_URL)
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

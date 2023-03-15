@@ -1,8 +1,8 @@
-const url = "http://localhost:8080/api"
+import { APP_URL } from "../..";
 
 export async function syncChats(): Promise<Store.Chat[]> {
     try {
-        const result = await fetch(url + "/chats/sync", {
+        const result = await fetch(APP_URL + "/chats/sync", {
                 method: "PUT",
                 headers: {
                 'Accept': 'application/json',

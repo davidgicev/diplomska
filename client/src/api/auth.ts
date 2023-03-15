@@ -1,4 +1,4 @@
-const url = "http://localhost:8080/api"
+import { APP_URL } from "..";
 
 export interface RegisterResponse {
     id: number
@@ -7,7 +7,7 @@ export interface RegisterResponse {
 
 export async function registerUser(user: Store.User): Promise<RegisterResponse | undefined> {
     try {
-        const result = await fetch(url + "/registerUser", {
+        const result = await fetch(APP_URL + "/registerUser", {
                 method: "POST",
                 headers: {
                 'Accept': 'application/json',

@@ -1,9 +1,9 @@
-const url = "http://localhost:8080/api"
+import { APP_URL } from "..";
 
 export async function getChatMessages(chatId: string): Promise<Record<string, Store.Message>> {
     try {
         const result = await fetch(
-            url + "/getChatMessages?chatId=" + chatId
+            APP_URL + "/getChatMessages?chatId=" + chatId
         )
 
         const parsed: Record<string, Store.Message> = await result.json()
